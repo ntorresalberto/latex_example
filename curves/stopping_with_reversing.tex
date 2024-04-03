@@ -1,0 +1,52 @@
+\begin{tikzpicture}
+
+\draw [-latex] (-2.5,.5) -- (-2.5,6.) ; %y axis
+\node at (-2.7,3.) {0};
+\draw [-latex](-2.5,3) -- (5.,3) node [anchor = north]{t}; %x axis
+
+\draw (-1.,3) -- (1.,5)  ; %ramp up 2 (deceleration)
+\draw (1.,5) -- (2.5,5)  ; % steady
+\draw (2.5,5) -- (4.5,3); % ramp down
+
+\draw[pattern=north east lines, pattern color = gray!20]
+(-1,3) -- (1.,5) -- (2.5,5) -- (4.5,3) -- (-1,3);
+\node at (1.8,3.8) {$ v(t_R) $};
+
+
+\draw (-2.5,1.5) -- (-1.,3)  ; %ramp up 1 (reversing)
+\draw[pattern=north west lines, pattern color = gray!25]
+(-2.5,1.5) -- (-1.,3) -- (-2.5,3) -- (-2.5,1.5);
+\draw [-stealth](-1.8,1.7) -- (-2.3,2.15);
+\node at (-.8,1.7) [anchor = north] {\smaller Acceleration Reversing};
+
+
+
+\node at (-2.5,1.5) [anchor = east]{ $ -a_k $ };
+\draw (-2.6,1.5) -- (-2.4,1.5);
+
+\node at (-2.5,1) [anchor = east]{ $ -a_M $ };
+\draw (-2.6,1) -- (-2.4,1);
+
+\node at (-2.5,5) [anchor = east]{ $ a_M $ };
+\draw (-2.6,5) -- (-2.4,5);
+
+
+\draw [latex -latex] (-2.5,2.9) -- node[anchor = north]{$t_R$} (-1.,2.9);
+\draw [latex -latex] (-1.,2.9) -- node[anchor = north]{$t_1$} (1.,2.9) ;
+\draw [latex -latex] (1,2.9) -- node[anchor = north]{$t_2$} (2.5,2.9) ;
+\draw [latex -latex] (2.5,2.9) -- node[anchor = north]{$t_3$} (4.5,2.9) ;
+\draw [latex -latex]  (-2.5,2.45) -- node[anchor = north]{$t_{\text{stop}}$}  (4.5,2.45);
+
+\node [rotate=45] at (-.4,4) {$j_{M}$};
+\node [rotate=-45] at (3.9,4) {$-j_{M}$};
+
+\draw [stealth-](1.8,4.6) -- (2.4,5.3);
+\node at (2.7,5.3) [anchor = south] {\smaller Deceleration};
+
+
+
+\node at (2,1.6) {$\quad t_R \leq t_s$};
+\node at (2,1.2) {$-v_k \leq 0 $};
+\node at (2,.8) {$-a_k \leq 0 $};
+
+\end{tikzpicture}

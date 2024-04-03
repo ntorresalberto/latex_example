@@ -1,0 +1,1032 @@
+% \pdfcompresslevel=0
+% \pdfobjcompresslevel=0
+
+\newcommand{\withbigtikz}[0]{} % uncomment to include c5 graphs
+% \newcommand{\csvfilesuffix}[0]{fast}
+% \newcommand{\csvfilesuffix}[0]{spline}
+\newcommand{\csvfilesuffix}[0]{normal}
+
+\usepackage{amsmath,bm} % bm redefines \boldsymbol{Symbol}!
+% \usepackage{setspace} % allows spacing in arrays?
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% shrink font size locally
+% (fixes problem with caption font size in tikz sub-figures)
+% https://tex.stackexchange.com/questions/250457/font-scaling-shrink-all-fontsizes-locally
+\usepackage{geometry}
+\makeatletter
+\let\zzfontsize\fontsize
+\def\zz#1#2{{%
+    \def\fontsize##1##2{%
+      \@defaultunits\@tempdima##1pt\relax\@nnil
+      \@defaultunits\@tempdimb##1pt\relax\@nnil
+      \zzfontsize{#1\@tempdima}{#1\@tempdimb}}#2}}
+\makeatother
+% NOTE: 0.64 is the magic number for font size footnotesize
+\newcommand{\captiontikz}[2]{\zz{0.64}{\caption{#1}\label{#2}}}
+% \newcommand{\captiontikz}[1]{\caption{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% image page with different margins
+% https://tex.stackexchange.com/a/78285
+\usepackage{afterpage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{tabularx}
+
+
+%%%%%%%%%%%%%%%%
+% table configs: https://tex.stackexchange.com/a/176780
+\usepackage{makecell}
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+%%%%%%%%%%%%%%%%
+
+
+\usepackage{dashrule}
+
+\usepackage{marginnote}
+\usepackage{qrcode}
+% \usepackage{pst-barcode}
+% \usepackage{auto-pst-pdf}
+
+\usepackage{amssymb}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% force right margin notes
+% https://tex.stackexchange.com/a/599049
+\usepackage{ifthen,changepage}
+\usepackage{xargs}
+\newcommandx{\leftmarginnote}[2][2=0pt]
+{\checkoddpage
+  \ifoddpage
+    {\reversemarginpar\marginnote{#1}[#2]}
+  \else
+    {\marginnote{#1}[#2]}
+  \fi}
+\newcommandx{\rightmarginnote}[2][2=0pt]
+{\checkoddpage
+  \ifoddpage
+    {\marginnote{#1}[#2]}
+  \else
+    {\reversemarginpar\marginnote{#1}[#2]}
+  \fi}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% revisited equations in marginnote
+% https://tex.stackexchange.com/questions/25491/manual-customizable-reference-text
+% \newcommand{\futurev}[1]{\marginnote{\footnotesize (revisited~\hyperref[#1]{later})}[0cm]}
+\newcommand{\revhspace}[0]{\hspace{.3cm}}
+\newcommand{\futurev}[1]{{
+    \scriptsize
+    \rightmarginnote{\revhspace
+      \hyperref[#1]{{\footnotesize revisited}~$\downarrow$}
+    }[0cm]}}
+\newcommand{\prevrev}[1]{{
+    \scriptsize
+    \rightmarginnote{\revhspace
+      \hyperref[#1]{{\footnotesize revisited}~$\uparrow$}
+    }[0cm]}}
+\newcommand{\prevfuturev}[2]{{
+    \scriptsize
+    \rightmarginnote{\revhspace
+      \hyperref[#1]{{\footnotesize
+          revisited}~$\uparrow$}~~\hyperref[#2]{$\downarrow$}
+    }[0cm]}}
+%%% for debugging:
+% \newcommand{\futurev}[1]    {\rightmarginnote{\scriptsize revisited \labelcref{#1}}[0cm]}
+% \newcommand{\prevrev}[1]    {\rightmarginnote{\scriptsize revisited \labelcref{#1}}[0cm]}
+% \newcommand{\prevfuturev}[2]{\rightmarginnote{\scriptsize revisited \labelcref{#1},\labelcref{#2}}[0cm]}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% chapter appendices
+% https://tex.stackexchange.com/questions/120716/appendix-after-each-chapter
+% \usepackage{appendix}
+\usepackage[page,toc,titletoc,title]{appendix}
+\AtBeginEnvironment{subappendices}{%
+  \chapter*{Appendix}
+  \addcontentsline{toc}{chapter}{Appendices}
+  \counterwithin{figure}{section}
+  \counterwithin{table}{section}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% used for theorems and definitions
+% Conflict with ICRA FORMAT
+% amsthm.sty:441: Command \proof already defined.
+\usepackage[thmmarks, thref, amsmath]{ntheorem}%
+% \usepackage{amsthm}
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}[section]
+
+% https://tex.stackexchange.com/questions/396485/is-there-a-way-to-modify-the-theorem-environment-in-order-to-have-an-horizontal
+% \theoremstyle{plain}
+% \theoremprework{\bigskip\hrule\vspace{-1.5ex}\leavevmode\nobreak
+% \leavevmode
+% }
+%   \theorempostwork{
+%   \vspace*{2mm}
+%   %   \vspace{-1ex}
+%   \hrule\bigskip\leavevmode
+% }
+\theoremheaderfont{\bfseries \scshape}
+\theorembodyfont{}%{\itshape}
+\theoremseparator{. }
+
+\theoremprework{
+    \vspace*{-2mm}
+    \begin{minipage}{\textwidth}
+    \bigskip\rule{\textwidth}{1pt}
+    % \bigskip\hrule
+    % \vspace*{2mm}
+  }
+  \theorempostwork{
+    % \vspace*{2mm}
+    % \hrule\bigskip
+    \rule{\textwidth}{1pt}\bigskip
+  \end{minipage}
+  \vspace*{-2mm}
+}
+\newtheorem*{remark}{Remark}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% make toc back and forth when clicking sections
+% https://tex.stackexchange.com/a/460820
+\usepackage{etoolbox}
+\usepackage{hyperref}
+\makeatletter
+\patchcmd{\addcontentsline}{{#2}{#3}{\thepage }}%
+{{#2}{#3}{\protect\Hy@raisedlink{\protect\hypertarget{back\@currentHref}{}}{\thepage}} }%
+{\typeout{** patch \string\addcontentsline\space success}}%
+{\typeout{** patch \string\addcontentsline\space failure}}%
+\AtBeginDocument{\renewcommand{\Sectionformat}[2]%
+  {\raggedright % avoids hyphenation (word breaks/splitting) in section/subsections
+    \ifnum #2>\c@secnumdepth {#1}\else\hyperlink{back\@currentHref}{#1~{\scriptsize$\uparrow$}}\fi}}
+\patchcmd{\@makechapterhead}{\bfseries #1\par}{\bfseries\hyperlink{back\@currentHref}{#1}\par}%
+{\typeout{** patch \string\@makechapterhead\space success}}%
+{\typeout{** patch \string\@makechapterhead\space failure}}
+\makeatother
+
+% https://tex.stackexchange.com/a/498546
+\AtEndPreamble{\RequirePackage{hyperref}
+  \hypersetup{
+    hypertexnames=true,
+    colorlinks=true,
+    % linkcolor=blue
+    citecolor=blue
+  }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% inspirational quote
+% https://tex.stackexchange.com/a/53378
+\usepackage{epigraph}
+\setlength{\epigraphwidth}{0.63\textwidth}
+
+
+
+\usepackage{soul} % for striked out text (\st)
+\usepackage{subcaption}
+% \captionsetup[subfigure]%
+% {labelformat=empty,justification=RaggedRight}
+\captionsetup[subfigure]%
+{
+  subrefformat=simple,labelformat=simple,
+  justification=justified, labelfont={rm, footnotesize}, font=footnotesize, width=0.5\textwidth}
+\captionsetup[figure]%
+{justification=justified, labelfont={rm, footnotesize}, font=footnotesize,
+  width=1\textwidth, margin=1cm}
+\usepackage{adjustbox}
+\captionsetup[table]%
+{justification=justified, labelfont={rm, footnotesize}, font=footnotesize,
+  width=1\textwidth, margin=1cm}
+
+
+
+% https://tex.stackexchange.com/a/180382
+\renewcommand\thesubfigure{(\alph{subfigure})}
+
+
+% \captionsetup{
+%   justification=justified,
+%   % font={scriptsize,sf},
+%   % font={small},
+%   font={footnotesize},
+%   width=1.1\textwidth} % Adjust the width as desired
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% required for tikzplotlib
+% \usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+% More defined colors
+
+\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+% \usepackage[dvipsnames]{xcolor}
+\usetikzlibrary{positioning}
+
+\usepackage{robotarm}
+% \DeclareUnicodeCharacter{2212}{−}
+\usepgfplotslibrary{groupplots,dateplot}
+\usepgfplotslibrary{fillbetween}
+\usetikzlibrary{patterns,shapes,arrows}
+
+\pgfplotsset{compat=newest,width=0.90\textwidth,height=130pt}
+% \pgfplotstableread[col sep = comma]{result.csv}\resultscsv
+% \pgfplotstableread[col sep = comma]{result_fast.csv}\resultscsv
+\definecolor{brown}{RGB}{165,42,42}
+\definecolor{dimgray85}{RGB}{229,229,229}
+\definecolor{firebrick}{RGB}{178,34,34}
+\definecolor{forestgreen}{RGB}{34,139,34}
+\definecolor{gainsboro229}{RGB}{255,255,255}
+\definecolor{steelblue}{RGB}{70,130,180}
+\definecolor{limits_color2}{RGB}{211,211,211}
+
+
+\definecolor{midnightblue}{rgb}{0.1, 0.1, 0.44}
+\definecolor{forestgreen}{rgb}{0.13, 0.55, 0.13}
+\definecolor{maroon}{rgb}{0.5, 0.0, 0.0}
+
+\colorlet{mydarkblue}{blue!50!black}
+\colorlet{xcol}{blue!70!black}
+\colorlet{xcol'}{xcol!50!red!80!black}
+\colorlet{veccol}{green!45!black}
+
+\usetikzlibrary{intersections}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{angles,quotes} % for pic
+\usetikzlibrary{math}
+
+
+% \tikzset{>=latex} % for LaTeX arrow head
+% \tikzset{font={\fontsize{10pt}{12}\selectfont}}
+% \pgfplotsset{major grid style={dotted,white!50!black}}
+
+\tikzstyle{vector}=[->,thick,veccol,line cap=round]
+\tikzstyle{rvec}=[->,thick,xcol,line cap=round]
+
+\tikzstyle{xvec}=[->,very thick,firebrick]
+\tikzstyle{yvec}=[->,very thick,forestgreen]
+\tikzstyle{zvec}=[->,very thick,steelblue!90!black]
+\tikzstyle{xvecu}=[->,very thick,firebrick!80!black, cap=round]
+\tikzstyle{yvecu}=[->,very thick,forestgreen!80!black, cap=round]
+\tikzstyle{zvecu}=[->,very thick,steelblue!70!black, cap=round]
+
+% \usetikzlibrary{external}
+
+
+\usepgfplotslibrary{external}
+\tikzexternalize[%
+mode=list and make, % https://tex.stackexchange.com/questions/40516/externalization-to-other-format-makefile-add-new-rules-to-the-makefile
+prefix=pgfplotsfigures/]% Folder needs to be created before compiling
+
+% \tikzexternalize[%
+% up to date check={simple},
+% prefix=pgfplotsfigures/]% Folder needs to be created before compiling
+
+\tikzset{external/system call={%
+    pdflatex -halt-on-error
+    % --save-size=80000
+    % --pool-size=10000000
+    % --extra-mem-top=50000000
+    % --extra-mem-bot=50000000
+    % --main-memory=90000000
+    -file-line-error
+    % --interaction=batchmode
+    --interaction=nonstopmode
+    --jobname "\image" "\texsource"}}
+
+% \tikzset{external/system call={%
+%     pdflatex \tikzexternalcheckshellescape
+%     -enable-write18 -halt-on-error -shell-escape -interaction=batchmode -output-directory=./pgfplotsfigures
+%     -jobname "\image" "\texsource"}}
+
+% \usepackage{pdfpages}
+% \tikzexternalize[shell escape=-enable-write18,optimize command away=\includepdf]
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        \tikzstyle{block} = [draw, align=center, fill=steelblue!20, rectangle, minimum height=1.3cm, minimum width=2cm]
+\tikzstyle{block_control} = [draw, align=center, fill=steelblue!30, rectangle, minimum height=1.3cm, minimum width=2cm]
+  \tikzstyle{block_model} = [draw, align=center, fill=firebrick!30, rectangle, minimum height=1.3cm, minimum width=2cm]
+  \tikzstyle{block_env} = [draw, align=center, fill=forestgreen!30, rectangle, minimum height=1.3cm, minimum width=2cm]
+\tikzstyle{sum} = [draw, align=center, fill=steelblue!20, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+\tikzstyle{snakearrow} = [->,decorate,decoration={snake, amplitude=.7mm, segment
+  length=2mm, pre length=.5mm, post length=1mm}]
+\tikzstyle{doublesnakearrow} = [decorate, <->,
+decoration={snake, amplitude=1.5mm, segment length=4mm, pre length=2mm, post
+  length=2mm}]
+
+% \usepackage{cleveref} % for range of equations
+% \newcommand{\crefrangeconjunction}{--}% for range of equations
+
+
+
+% https://tex.stackexchange.com/a/121055
+\usepackage[nameinlink]{cleveref}
+\AtBeginEnvironment{appendices}{\crefalias{chapter}{appendix}}
+% see for equations: https://tex.stackexchange.com/a/647018
+
+
+% see for equations: https://tex.stackexchange.com/a/647018
+% \setlength{\marginparwidth}{2cm}
+% \usepackage{todonotes}
+\usepackage{mathtools}
+% \newtagform{show_eq}{(Eq.\ }{)}  % how the equation numbers are displayed
+% \newtagform{show_eq}{(}{)}  % how the equation numbers are displayed
+% \usetagform{show_eq}
+
+% \renewcommand{\theequation}{\textit{Eq. \thesection.\arabic{equation}}}
+% \renewcommand{\theequation}{\arabic{section}.\arabic{equation}}
+% \renewcommand{\theequation}{\arabic{equation}} % uses numbering in arabic
+                                % instead of roman
+
+% % removes section/subsection from equation numbering
+% \usepackage{chngcntr}
+% \numberwithin{equation}{section} % how the equation numbers are formed
+% \counterwithout{equation}{chapter}
+% \counterwithout{equation}{section} % don't reset eq counter each Section
+% \counterwithout{equation}{subsection}
+
+\setcounter{secnumdepth}{5}
+
+% https://texblog.org/2012/12/21/multi-column-and-multi-row-cells-in-latex-tables/
+\usepackage{multirow}
+
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e} % for formatted algorithms
+\SetKwFor{For}{for (}{) $\lbrace$}{$\rbrace$}
+\SetNlSty{textbf}{}{:}% Add colon after line number
+\IncMargin{.2em}% Push algorithm to the right (allowing for larger line numbering)
+
+\usepackage[makeroom]{cancel} % example: cross out tends to infinity
+
+
+\usepackage{xparse} % needed for \IfNoValueTF (logic in function widhout args)
+
+\newcommand{\circled}[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
+
+
+
+% see for equations: https://tex.stackexchange.com/a/647018
+% \renewcommand{\eqref}[1]{eq. \textup{\ref{eqn:#1}}}
+% \renewcommand{\eqref}[1]{~(\textup{\ref{eqn:#1}})}
+%\newcommand{\figref}[1]{fig. \textup{\ref{fig:#1}}}
+%\newcommand{\algref}[1]{alg. \textup{\ref{alg:#1}}}
+
+% How to disable hyphenation in all section and subsection titles
+% https://tex.stackexchange.com/a/24783
+% \usepackage[raggedright]{titlesec} % breaks back ref
+
+% \usepackage{titlesec}
+% \titleformat{\paragraph}
+% {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+% \titlespacing*{\paragraph}
+% {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+% https://tex.stackexchange.com/questions/8361/latex-ieeetran-cls-use-titlesec-package
+%\newcommand{\subparagraph}{}
+
+\usepackage[normalem]{ulem} % strikethrough text with \sout
+
+\newcommand{\eqarray}[1]{\begin{cases}
+                           #1
+                         \end{cases}}
+
+% interval/vectors
+\newcommand\X[0]{\boldsymbol{X}}
+\newcommand\Y[0]{\boldsymbol{Y}}
+\newcommand\y[0]{\boldsymbol{y}}
+\newcommand\yhat[0]{\boldsymbol{\hat{y}}}
+\newcommand\yover[0]{\boldsymbol{\overline{y}}}
+\newcommand\yoover[0]{\boldsymbol{\overline{\overline{y}}}}
+\newcommand\Yhat[0]{\boldsymbol{\hat{Y}}}
+\newcommand\B[0]{\boldsymbol{B}} % bias forces (coriolis + gravity)
+\newcommand\Bunder[0]{\boldsymbol{\underline{B}}}
+\newcommand\Bover[0]{\boldsymbol{\overline{B}}}
+\newcommand\Bhat[0]{\boldsymbol{\hat{B}}}
+\newcommand\C[0]{\boldsymbol{C}}
+\newcommand\Chat[0]{\boldsymbol{\hat{C}}}
+\newcommand\Cover[0]{\boldsymbol{\overline{C}}}
+\newcommand\Cunder[0]{\boldsymbol{\underline{C}}}
+\newcommand\Coover[0]{\boldsymbol{\overline{\overline{C}}}}
+\newcommand\ubold[0]{\boldsymbol{u}}
+\newcommand\U[0]{\boldsymbol{U}}
+\newcommand\Uhat[0]{\boldsymbol{\hat{U}}}
+\newcommand\Uover[0]{\boldsymbol{\overline{U}}}
+\newcommand\Uunder[0]{\boldsymbol{\underline{U}}}
+\newcommand\E[0]{\boldsymbol{E}}
+\newcommand\A[0]{\boldsymbol{A}}
+\newcommand\Ahat[0]{\boldsymbol{\hat{A}}}
+\newcommand\Aover[0]{\boldsymbol{\overline{A}}}
+\newcommand\Aunder[0]{\boldsymbol{\underline{A}}}
+\newcommand\Aoover[0]{\boldsymbol{\overline{\overline{A}}}}
+\newcommand\D[0]{\boldsymbol{D}} % incompatible with ARK22 template
+\newcommand\Dhat[0]{\boldsymbol{\hat{D}}}
+\newcommand\Dover[0]{\boldsymbol{\overline{D}}}
+\newcommand\Doover[0]{\boldsymbol{\overline{\overline{D}}}}
+\newcommand\Q[0]{\boldsymbol{Q}}
+\newcommand\Qdot[0]{\boldsymbol{\dot{Q}}}
+\newcommand\Qddot[0]{\boldsymbol{\ddot{Q}}}
+\newcommand\Qdddot[0]{\boldsymbol{\dddot{Q}}}
+\newcommand\Wcal[0]{\mathcal{W}}
+\newcommand\Lcal[0]{\mathcal{L}}
+\newcommand\Lcaldot[0]{\mathcal{\dot{L}}}
+\newcommand\Lcalddot[0]{\mathcal{\ddot{L}}}
+\newcommand\Lcaldddot[0]{\mathcal{\dddot{L}}}
+\newcommand\Qcal[0]{\mathcal{Q}}
+\newcommand\Qcaldot[0]{\mathcal{\dot{Q}}}
+\newcommand\Qcalddot[0]{\mathcal{\ddot{Q}}}
+\newcommand\Qcaldddot[0]{\mathcal{\dddot{Q}}}
+\newcommand\Qcalkyn[0]{\Qcal_{\kyn}}
+
+\newcommand\kk[0]{\boldsymbol{k}}
+\newcommand\K[0]{\boldsymbol{K}}
+\newcommand\R[0]{\boldsymbol{R}}
+\newcommand\Rdot[0]{\boldsymbol{\dot{R}}}
+\newcommand\Pbold[0]{\boldsymbol{P}}
+\newcommand\boldgamma[0]{\boldsymbol{\gamma}}
+\newcommand\boldgammaunder[0]{\underline{\boldsymbol{\gamma}}}
+\newcommand\V[0]{\boldsymbol{V}}
+\newcommand\Vcal[0]{\mathcal{\boldsymbol{V}}}
+\newcommand\Ucal[0]{\mathcal{\boldsymbol{U}}}
+\newcommand\Hcal[0]{\mathcal{\boldsymbol{H}}}
+\newcommand\Ccal[0]{\mathcal{\boldsymbol{C}}}
+\newcommand\Acal[0]{\mathcal{\boldsymbol{A}}}
+\newcommand\Scal[0]{\mathcal{\boldsymbol{S}}}
+\newcommand\Mcal[0]{\mathcal{\boldsymbol{M}}}
+\newcommand\Ycal[0]{\mathcal{\boldsymbol{Y}}}
+\newcommand\Tcal[0]{\mathcal{\boldsymbol{T}}}
+\newcommand\Tcaldot[0]{\mathcal{\boldsymbol{\dot{T}}}}
+\newcommand\Vhat[0]{\boldsymbol{\hat{V}}}
+\newcommand\Vunder[0]{\boldsymbol{\underline{V}}}
+\newcommand\W[0]{\boldsymbol{W}}
+% \newcommand\E[0]{\boldsymbol{E}} % incompatible with ARK22 template
+\newcommand\What[0]{\boldsymbol{\hat{W}}}
+\newcommand\Wover[0]{\boldsymbol{\overline{W}}}
+\newcommand\Woover[0]{\boldsymbol{\overline{\overline{W}}}}
+\newcommand\F[0]{\boldsymbol{F}}
+\newcommand\boldxiunder[0]{\boldsymbol{\underline{\xi}}}
+\newcommand\boldxi[0]{\boldsymbol{\xi}}
+\newcommand\boldXi[0]{\boldsymbol{\Xi}}
+\newcommand{\irchi}[2]{\raisebox{\depth}{$#1\chi$}} % inner command, used by \rchi
+% \DeclareRobustCommand{\rchi}{{\mathpalette\irchi\relax}}
+% \newcommand\boldchi[0]{\boldsymbol{\rchi}}
+% \newcommand\boldchihat[0]{\boldsymbol{\hat{\rchi}}}
+% \newcommand\boldChi[0]{\scalebox{1.2}{$\boldsymbol{\rchi}$}}
+\newcommand\boldChi[0]{\boldsymbol{\mathcal{X}}}
+\newcommand\lift[0]{\boldsymbol{\psi}}
+
+
+
+% \newcommand\taskconstraintssym[0]{\mathrm{\Gamma}}
+% \newcommand\taskconstraintssym[0]{\mathcal{X}}
+\newcommand\taskconstraintssym[0]{\mathcal{P}}
+\newcommand\taskconstraintsgeom[0]   {\taskconstraintssym}
+\newcommand\taskconstraintsgeomd[0]  {\mathcal{V}}
+\newcommand\taskconstraintsgeomdd[0] {\mathcal{A}}
+\newcommand\taskconstraintsgeomddd[0]{\mathcal{J}}
+\newcommand\taskconstraintskyn[0]{\taskconstraintssym_{\kyn}}
+\newcommand\Bcal[0]{\mathcal{B}}
+\newcommand\pol[0]{\mathcal{P}}
+\newcommand\polhat[0]{\mathcal{\hat{P}}}
+\newcommand\pold[0]{\dot{\mathcal{P}}}
+\newcommand\poldd[0]{\ddot{\mathcal{P}}}
+\newcommand\polddd[0]{\dddot{\mathcal{P}}}
+
+\newcommand\kyn[0]{\mathcal{K}}
+
+\newcommand\Nt[0]{\text{N}}
+\newcommand\kt[0]{\text{k}}
+\newcommand\horizonsteps[0]{\text{h}}
+\newcommand\initialpose[0]{\pose_i}
+\newcommand\initialposelog[0]{\poselog_i}
+\newcommand\targetstate[0]{\x_t}
+\newcommand\targetx[0]{\x_t}
+\newcommand\targetXover[0]{\Xover_t}
+\newcommand\targetpose[0]{\pose_t}
+\newcommand\targetposelog[0]{\poselog_t}
+\newcommand\targetpos[0]{\pos_t}
+\newcommand\targetR[0]{\R_t}
+\newcommand{\ad}[1][]{%
+  \def\FirstArg{#1}
+  \ifx\FirstArg\empty
+  % if #1 is empty
+  \ensuremath{\text{\textbf{ad}}}
+  \else
+  % if #1 is not empty
+  \ensuremath{\text{\textbf{ad}}_{#1}}
+  \fi
+  \:
+}
+\newcommand{\Ad}[1][]{%
+  \def\FirstArg{#1}
+  \ifx\FirstArg\empty
+  % if #1 is empty
+  \ensuremath{\text{\textbf{Ad}}}
+  \else
+  % if #1 is not empty
+  \ensuremath{\text{\textbf{Ad}}_{#1}}
+  \fi
+  \:
+}
+
+
+\newcommand\jointint[1]{\boldsymbol{q_{#1}}}
+\newcommand\lbold[0]{\boldsymbol{l}}
+\newcommand\f[0]{\boldsymbol{f}}
+\newcommand\g[0]{\boldsymbol{g}}
+\newcommand\q[0]{\boldsymbol{q}}
+\newcommand\qhat[0]{\hat{\q}}
+\newcommand\deltatvec[0]{\boldsymbol{\Delta t}}
+\newcommand\dt[0]{\delta t}
+\newcommand\deltalog[0]{\boldsymbol{\delta}}
+
+
+\newcommand\lb[0]{\bbold_{\lbold}}
+\newcommand\ub[0]{\bbold_{\ubold}}
+\newcommand\Alb[0]{\A_{\lbold}}
+\newcommand\Aub[0]{\A_{\ubold}}
+\newcommand\Clb[0]{\C_{\lbold}}
+\newcommand\Cub[0]{\C_{\ubold}}
+\newcommand\qlb[0]{\q_{m}}
+\newcommand\qub[0]{\q_{M}}
+\newcommand\qdotlb[0]{\qdot_{m}}
+\newcommand\qdotub[0]{\qdot_{M}}
+\newcommand\qddotlb[0]{{\qddot}_{m}}
+\newcommand\qddotub[0]{{\qddot}_{M}}
+\newcommand\qdddotlb[0]{{\qdddot}_{m}}
+\newcommand\qdddotub[0]{{\qdddot}_{M}}
+\newcommand\taulb[0]{{\tautorque}_{m}}
+\newcommand\tauub[0]{{\tautorque}_{M}}
+\newcommand\taudotlb[0]{{\tautorquedot}_{m}}
+\newcommand\taudotub[0]{{\tautorquedot}_{M}}
+
+\newcommand\p[0]{\boldsymbol{p}}
+\newcommand\abold[0]{\boldsymbol{a}}
+\newcommand\bbold[0]{\boldsymbol{b}} % bias forces (coriolis + gravity)
+\newcommand\cbold[0]{\boldsymbol{c}}
+\newcommand\dbold[0]{\boldsymbol{d}}
+\newcommand\ebold[0]{\boldsymbol{e}}
+\newcommand\gbold[0]{\boldsymbol{g}}
+\newcommand\hbold[0]{\boldsymbol{h}}
+\newcommand\rbold[0]{\boldsymbol{r}}
+
+\newcommand\vel[0]{\boldsymbol{v}}
+\newcommand\acc[0]{\boldsymbol{a}}
+\newcommand\jer[0]{\boldsymbol{j}}
+
+% \newcommand\vel[0]{\posdot}
+% \newcommand\acc[0]{\posddot}
+% \newcommand\jer[0]{\posdddot}
+
+
+\newcommand\w[0]{\boldsymbol{w}}
+\newcommand\x[0]{\boldsymbol{x}}
+\newcommand\xhat[0]{\boldsymbol{\hat{x}}}
+\newcommand\xhor[1]{\boldsymbol{x}_{#1}}
+\newcommand\xtilde[0]{\boldsymbol{\tilde{x}}}
+\newcommand\xdothat[0]{\boldsymbol{\dot{\hat{x}}}}
+\newcommand\xddothat[0]{\boldsymbol{\ddot{\hat{x}}}}
+\newcommand\xover[0]{\boldsymbol{\overline{x}}}
+\newcommand\xoover[0]{\boldsymbol{\overline{\overline{x}}}}
+\newcommand\Xhat[0]{\boldsymbol{\hat{X}}}
+\newcommand\Xover[0]{\boldsymbol{\overline{X}}}
+\newcommand\Xunder[0]{\boldsymbol{\underline{X}}}
+\newcommand\Xunderover[0]{\boldsymbol{\underline{\overline{X}}}}
+\newcommand\xbar[0]{\boldsymbol{\bar{x}}}
+\newcommand\z[0]{\boldsymbol{z}}
+\newcommand\zhat[0]{\boldsymbol{\hat{z}}}
+\newcommand\xdot[0]{\boldsymbol{\dot{x}}}
+\newcommand\xddot[0]{\boldsymbol{\ddot{x}}}
+\newcommand\xdddot[0]{\boldsymbol{\dddot{x}}}
+\newcommand\Xdot[0]{\boldsymbol{\dot{X}}}
+\newcommand\Xddot[0]{\boldsymbol{\ddot{X}}}
+\newcommand\ydot[0]{\boldsymbol{\dot{y}}}
+\newcommand\zdot[0]{\boldsymbol{\dot{z}}}
+\newcommand\e[0]{\boldsymbol{e}}
+\newcommand\edot[0]{\boldsymbol{\dot{e}}}
+\newcommand\eddot[0]{\boldsymbol{\ddot{e}}}
+
+\definecolor{ForestGreen}{RGB}{34,139,34}
+\definecolor{Brown}{RGB}{121,37,0}
+% \definecolor{Sepia}{RGB}{103,24,0}
+\definecolor{BitterSweet}{RGB}{192,79,23}
+
+% \newcommand\wip[1]{\textcolor{BitterSweet}{\textbf{#1}}}
+\newcommand{\wip}[1]{{\leavevmode\color{BitterSweet}#1}}
+
+\newcommand\colorize[1]{\textcolor{red}{#1}}
+\newcommand\colorizee[1]{\textcolor{orange}{#1}}
+\newcommand\colorizeee[1]{\textcolor{blue}{#1}}
+\newcommand\colorizeeee[1]{\textcolor{ForestGreen}{#1}}
+% https://tex.stackexchange.com/questions/65058/how-to-change-the-fboxsep-and-fboxrule-of-ltxexamples-rframe
+\fboxrule=0.2ex % sets thickness of boxes
+\newcommand\mynote[1]{\noindent\fbox{\begin{minipage}{0.47\textwidth}#1\end{minipage}}}
+% \newcommand\mycolornote[1]{\noindent\fcolorbox{orange}{white}{\begin{minipage}{0.47\textwidth}#1\end{minipage}}}
+\newcommand\mycolornote[1]{\noindent\fcolorbox{BitterSweet}{white}{
+% \minipage[t]{0.47\textwidth}#1
+\minipage[t]{\textwidth}#1
+\endminipage}}
+\newcommand\boxeditems[1]{\mycolornote{\items{#1}}}
+
+
+\newcommand\items[1]{{
+    % \emergencystretch 3em %https://tex.stackexchange.com/a/9110
+    \begin{itemize} #1
+    \end{itemize}}
+}
+\newcommand\enumerated[1]{{
+    % \emergencystretch 3em %https://tex.stackexchange.com/a/9110
+    \begin{enumerate} #1 \end{enumerate}}
+}
+\newcommand\error[0]{\boldsymbol{e}}
+\newcommand\poss[0]{p}
+\newcommand\pos[0]{\boldsymbol{p}}
+\newcommand\posdot[0]{\boldsymbol{\dot{p}}}
+\newcommand\posddot[0]{\boldsymbol{\ddot{p}}}
+\newcommand\posdddot[0]{\boldsymbol{\dddot{p}}}
+\newcommand\poshat[0]{\boldsymbol{\hat{p}}}
+\newcommand\phat[0]{\hat{\p}}
+\newcommand\velhat[0]{\hat{\vel}}
+\newcommand\acchat[0]{\hat{\acc}}
+\newcommand\posover[0]{\boldsymbol{\overline{p}}}
+\newcommand\posoover[0]{\boldsymbol{\overline{\overline{p}}}}
+\newcommand\posdothat[0]{\boldsymbol{\hat{\dot{p}}}}
+\newcommand\posdotover[0]{\boldsymbol{\overline{\dot{p}}}}
+\newcommand\posdotoover[0]{\boldsymbol{\overline{\overline{\dot{p}}}}}
+\newcommand\posddothat[0]{\boldsymbol{\hat{\ddot{p}}}}
+\newcommand\posdddothat[0]{\boldsymbol{\hat{\dddot{p}}}}
+\newcommand\posddotover[0]{\boldsymbol{\overline{\ddot{p}}}}
+\newcommand\posddotoover[0]{\boldsymbol{\overline{\overline{\ddot{p}}}}}
+\newcommand\uinput[0]{\boldsymbol{u}}
+\newcommand\uinputdot[0]{\boldsymbol{\dot{u}}}
+\newcommand\uinputddot[0]{\boldsymbol{\ddot{u}}}
+\newcommand\uinputhat[0]{\boldsymbol{\hat{u}}}
+\newcommand\uinputtilde[0]{\boldsymbol{\tilde{u}}}
+\newcommand\uinputunder[0]{\boldsymbol{\underline{u}}}
+\newcommand\uinputover[0]{\boldsymbol{\overline{u}}}
+\newcommand\uinputoover[0]{\boldsymbol{\overline{\overline{u}}}}
+\newcommand\uinputhor[1]{\boldsymbol{u}_{#1}}
+\newcommand\T[0]{\boldsymbol{T}}
+\newcommand\Tdot[0]{\boldsymbol{\dot{T}}}
+\newcommand\qdot[0]{\boldsymbol{\dot{q}}}
+\newcommand\qddot[0]{\boldsymbol{\ddot{q}}}
+\newcommand\qdddot[0]{\boldsymbol{\dddot{q}}}
+
+% quaternion
+\newcommand\quat[0]{r}
+\newcommand\quati[1]{r_{#1}}
+\newcommand\quatreal[0]{\quat_w}
+\newcommand\quatrealdot[0]{\dot{\quat_w}}
+\newcommand\quatim[0]{\boldsymbol{\quat_v}}
+\newcommand\quatimdot[0]{\boldsymbol{\dot{\quat_v}}}
+\newcommand\quatvec[0]{\boldsymbol{\quat}}
+\newcommand\quatvecdot[0]{\boldsymbol{\dot{\quat}}}
+\newcommand\qi[0]{\boldsymbol{i}}
+\newcommand\qj[0]{\boldsymbol{j}}
+\newcommand\qk[0]{\boldsymbol{k}}
+
+\newcommand\tautorque[0]{\boldsymbol{\tau}}
+\newcommand\tautorquehat[0]{\boldsymbol{\hat{\tau}}}
+\newcommand\tautorquep[0]{\tautorque'}
+\newcommand\tautorquedot[0]{\boldsymbol{\dot{\tau}}}
+\newcommand\tautorquedothat[0]{\boldsymbol{\dot{\hat{\tau}}}}
+\newcommand\tautorquekp[0]{\tautorque'_k}
+\newcommand\tautorquekpt[0]{{\tautorquekp}^T}
+
+%\newcommand\skewmat[1]{[#1]_{\scalebox{0.7}{$\times$}}}
+\newcommand\skewmat[1]{{#1}^{^{\wedge}}\,}
+\newcommand\unskewmat[1]{{#1}^{^{\vee}}\,}
+
+\newcommand\maxx[0]{{\text{max}}}
+\newcommand\minn[0]{{\text{min}}}
+\newcommand\m[0]{{\text{m}}}
+\newcommand\ms[0]{{\text{ms}}}
+\newcommand\rad[0]{{\text{rad}}}
+\newcommand\s[0]{{\text{s}}}
+\newcommand\dexp[0]{{\text{dexp}}}
+\newcommand\dlog[0]{{\text{dlog}}}
+\newcommand\Jlog[0]{{\text{J}^{\log}_\text{R}}}
+\newcommand\angular[0]{{\text{ang}}}
+\newcommand\linear[0]{{\text{linear}}}
+\newcommand\lin[0]{{\text{lin}}}
+\newcommand\mpc[0]{{\text{mpc}}}
+\newcommand\target[0]{{\text{t}}}
+\newcommand\optt[0]{{\text{opt}}}
+
+
+
+\newcommand\bch[0]{\boldsymbol{\Omega}}
+\newcommand\bchf[1]{\bch(#1)} %linear velocity
+\newcommand\linvel[0]{\boldsymbol{v}} %linear velocity
+\newcommand\linveldot[0]{\boldsymbol{\dot{v}}} %linear velocity
+\newcommand\linvelddot[0]{\boldsymbol{\ddot{v}}} %linear velocity
+
+\newcommand\boldeps[0]{\boldsymbol{\epsilon}}
+\newcommand\boldepsdot[0]{\boldsymbol{\dot{\epsilon}}}
+\newcommand\rotlognorm[0]{\phi} %rotational log
+\newcommand\rotlog[0]{\boldsymbol{\rotlognorm}} %rotational log
+\newcommand\rotloghat[0]{\boldsymbol{\hat{\rotlognorm}}} %rotational log
+\newcommand\rotvel[0]{\boldsymbol{\omega}} %rotational velocity
+\newcommand\rotveldot[0]{\boldsymbol{\dot{\omega}}} %rotational velocity
+\newcommand\rotvelddot[0]{\boldsymbol{\ddot{\omega}}} %rotational velocity
+\newcommand\rotvelhat[0]{\boldsymbol{\hat{\omega}}} %rotational velocity
+\newcommand\rotvell[0]{\omega} %rotational velocity
+\newcommand\rotacc[0]{\boldsymbol{\alpha}} %rotational acceleration
+\newcommand\motiond[0]{\hat{\linvel}}
+\newcommand\linacc[0]{\boldsymbol{a}}
+\newcommand\jac[0]{\boldsymbol{J}} %jacobian
+\newcommand\jachat[0]{\boldsymbol{\hat{J}}} %jacobian
+\newcommand\jacdot[0]{\boldsymbol{\dot{J}}}
+\newcommand\jacddot[0]{\boldsymbol{\ddot{J}}}
+\newcommand\jacquat[0]{\jac_\quat}
+% \newcommand\twist[0]{\boldsymbol{T}}
+\newcommand\twist[0]{\boldsymbol{\nu}}
+% \newcommand\twist[0]{\boldsymbol{\mathcal{V}}}
+\newcommand\twistd[0]{\boldsymbol{\dot{\nu}}}
+\newcommand\twistacc[0]{\boldsymbol{a}}
+
+\newcommand\twistdd[0]{\boldsymbol{\ddot{\nu}}}
+\newcommand\initialtwist[0]{\twist_i}
+% \newcommand\twist[0]{\boldsymbol{\upsilon}}
+
+\newcommand\rhobold[0]{\boldsymbol{\rho}}
+\newcommand\rhobolddot[0]{\boldsymbol{\dot{\rho}}}
+\newcommand\rhoboldddot[0]{\boldsymbol{\ddot{\rho}}}
+\newcommand\pose[0]{\mathcal{X}}
+\newcommand\posedot[0]{\mathcal{\dot{X}}}
+\newcommand\poselog[0]{\boldxi}
+\newcommand\poselogdot[0]{\rhobolddot}
+\newcommand\poselogddot[0]{\rhoboldddot}
+\newcommand\oq[0]{\quatvec} % orientation quaternion
+\newcommand\oqdot[0]{\dot{\quatvec}} % orientation quaternion
+
+
+\newcommand\iden[1]{\boldsymbol{\mathrm{I}}_{#1}}
+\newcommand\eye[1][]{\iden{#1}}
+\newcommand\zeros[1][]{\boldsymbol{0_{#1}}}
+
+% robot dynamics
+\newcommand\wrench[0]{\boldsymbol{W}}
+\newcommand\imat[0]{\boldsymbol{M}} %inertia matrix
+% \usepackage{physics}
+% \renewcommand{\imat}[0]{\boldsymbol{M}} % package physics defines imat for the identity
+\newcommand\imatcart[0]{\boldsymbol{\Lambda}} %inertia matrix cartesian space
+\newcommand\imatcartv[0]{\imatcart_{\linvel}} %linear inertia matrix cartesian space
+\newcommand\imatcartw[0]{\imatcart_{\rotvel}} %rotational inertia matrix cartesian space
+\newcommand\biasforces[0]{\boldsymbol{b}} % bias forces (coriolis + gravity)
+\newcommand\biasforcesdot[0]{\boldsymbol{\dot{B}}} % bias forces (coriolis + gravity)
+\newcommand\cor[0]{\boldsymbol{C}} % coriolis
+\newcommand\grav[0]{\boldsymbol{G}} % gravity
+
+
+\newcommand{\lieG}[0]{\mathcal{G}}
+\newcommand{\lieg}[0]{\mathfrak{g}}
+\newcommand{\liespace}[1]{\mathfrak{#1}^{3}}
+\newcommand{\coordspace}[2]{\mathbb{#1}^{#2}}
+\newcommand{\incoordspace}[2]{\in \coordspace{#1}{#2}}
+\newcommand{\module}[1]{\left\vert#1\right\vert}
+% \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\SOn}[1]{\mathbb{SO}(#1)}
+\newcommand{\sothree}[0]{\mathfrak{so}(3)}
+\newcommand{\SOthree}[0]{\mathbb{SO}(3)}
+\newcommand{\sotwo}[0]{\mathfrak{so}(2)}
+\newcommand{\SOtwo}[0]{\mathbb{SO}(2)}
+\newcommand{\setwo}[0]{\mathfrak{se}(2)}
+\newcommand{\SEtwo}[0]{\mathbb{SE}(2)}
+\newcommand{\sethree}[0]{\mathfrak{se}(3)}
+\newcommand{\SEthree}[0]{\mathbb{SE}(3)}
+% https://www.overleaf.com/learn/latex/Spacing_in_math_mode
+% \newcommand{\suchthat}[0]{\;\:|\;\:}
+% \newcommand{\suchthat}[0]{\,|\,}
+\newcommand{\suchthat}[0]{~|~}
+\newcommand{\argminn}[1]{\underset{#1}{\arg\min}}
+\DeclareMathOperator*{\argmin}{\arg\min}
+%\NewDocumentCommand{\norm}{ O{2} O{2} m  }{\left\|#3\right\|^{{}^{#2}}_{{}_{#1}}}
+\newcommand{\reg}[0]{\text{reg}}
+\newcommand{\reft}[0]{\text{ref}}
+\newcommand{\des}[0]{\text{des}}
+\newcommand{\opt}[0]{\text{opt}}
+\newcommand{\manif}[0]{\mathcal{M}}
+\newcommand{\leftbr}[0]{\left[\!\!}
+\newcommand{\rightbr}[0]{\!\!\right]}
+\newcommand{\Ttext}[0]{\text{T}}
+
+
+
+
+\newcommand{\rvect}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\vvect}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\interval}[1]{[\underline{#1}, \overline{#1}]}
+
+\maxdeadcycles=500
+\usepackage{graphicx}
+% \usepackage{cleveref}
+% \crefname{plot}{plot}{plots}
+% \Crefname{plot}{Plot}{Plots}
+% \usepackage{subcaption}
+% \usepackage[style=base]{caption}
+% \newcommand*\SubplotLabel[1]{
+%         \node [
+%             anchor=north west,
+%             text width=2em,
+%             text height=2ex,
+%             text depth=1ex,
+%             align=left,
+%         ] at (axis description cs:0.02,0.98)
+%             {\phantomsubcaption\label{#1}\subref{#1})};
+%     }
+
+% \newcommand{\SubplotLabel}[1]{%
+% \node [below right] at (rel axis cs:0,1) {\refstepcounter{plot}\label{#1}\ref{#1})};
+% }
+
+
+
+\newcommand{\insertfigure}[1]{\noindent\makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{figures/#1}}}
+
+
+\newcommand{\figurecaptionlabel}[3]{
+  \begin{figure}
+    \centerline{\includegraphics[width=0.8\paperwidth]{figures/#1}}
+    \IfNoValueTF{#2}{
+      % no label
+    } {\caption{#2}}
+
+    % labeling
+    \IfNoValueTF{#3}{
+      % no label
+    } {
+      % label provided
+      \label{fig:#3}
+    }
+  \end{figure}
+}
+
+\newcommand{\myequation}[1]{
+  \begin{equation}
+    \begin{aligned}
+      #1
+    \end{aligned}
+  \end{equation}
+}
+\newcommand{\myrefequation}[2]{\myequation{\label{eqn:#1}#2}}
+
+\newcommand{\myarray}[2]{\begin{array}{#1} #2 \end{array}}
+\newcommand{\mymat}[2]{\left[\begin{array}{#1} #2 \end{array}\right]}
+
+
+% \setlength{\parindent}{4em}
+% \setlength{\parskip}{1em}
+\usepackage{standalone}
+\usepackage{listings} % for code highlight
+% \lstset{
+%   escapeinside={\%*}{*)}          % if you want to add LaTeX within your code
+% }
+
+\newcommand{\diag}[1]{\mathrm{diag}\left(#1\right)}
+
+% \usepackage[
+% sort,
+% section,
+% numberedsection=autolabel,
+% nogroupskip,
+% abbreviations,
+% automake]{glossaries-extra}
+% \usepackage[abbreviations, automake]{glossaries-extra} % breaks tikzexternalize?
+\usepackage[abbreviations]{glossaries-extra}
+% https://tex.stackexchange.com/a/435680
+\preto\chapter{\glsresetall}
+\preto\section{\glsresetall}
+\makeglossaries
+\newabbreviation{ts}{TS}{Technical Specification}
+\newabbreviation{hri}{HRI}{Human-Robot Interaction}
+\newabbreviation{mpc}{MPC}{Model Predictive Control}
+\newabbreviation{ss}{SS}{State Space}
+\newabbreviation{fk}{FK}{Forward Kinematics}
+\newabbreviation{ik}{IK}{Inverse Kinematics}
+\newabbreviation{pid}{PID}{Proportional Integral Derivative}
+\newabbreviation{me}{ME}{Magnus Expansion}
+\newabbreviation{qp}{QP}{Quadratic Program}
+\newabbreviation{pd}{PD}{Proportional Derivative}
+\newabbreviation{csc}{CSC}{Cartesian-space Constraints}
+\newabbreviation{jsc}{JSC}{Joint-space Constraints}
+\newabbreviation{lti}{LTI}{Linear Time-Invariant}
+\newabbreviation{dof}{DoF}{Degree of Freedom}
+
+
+\newcommand{\figwidth}{0.8\linewidth}
+\newcommand{\smallfigwidth}{0.5\linewidth}
+
+\addtolength{\jot}{5pt} % math interline spacing
+\renewcommand{\arraystretch}{1.2} % array spacing
+
+
+
+% https://tex.stackexchange.com/questions/4637/correct-use-of-paragraph-titles
+\let\originalparagraph\paragraph
+\renewcommand{\paragraph}[2][.]{\originalparagraph{#2#1}}
+% If you don't want a period, you can use something like \paragraph[?]{Title}, then a '?' will be placed at the end instead of a period.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://tex.stackexchange.com/a/59139
+\makeatletter
+\newenvironment{summary}
+{ % \addcontentsline{toc}{section}{Summary}{}{}
+  % \begin{center}\textbf{Abstract}\end{center}
+  \list{}{\listparindent 1em%
+    % \setlength{\leftmargin}{<value>} adjust if you need
+    \itemindent\listparindent
+    \rightmargin\leftmargin
+    \parsep\z@ \@plus\p@}%
+\item\relax}
+{\noindent\rule{0.618\textwidth}{0.7pt}
+  \endlist}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://tex.stackexchange.com/a/2437
+% workaround to avoid loading this in test file
+\usepackage{ifthen}
+\ifthenelse{\isundefined{\testfile}}{
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{etoc}
+\usepackage{tocloft}
+\tocloftpagestyle{empty}
+
+% \renewcommand{\cftchapfont}{\bfseries\LARGE}
+% \renewcommand{\cftsecfont}{\bfseries\Large}
+% \renewcommand{\cftsubsecfont}{\large}
+\renewcommand{\cftsubsubsecfont}{\small}
+
+\renewcommand{\cftchapfont}{\bfseries\large}
+\renewcommand{\cftsecfont}{\bfseries\normalsize}
+% \renewcommand{\cftsubsecfont}{\small}
+% \renewcommand{\cftsubsubsecfont}{\small}
+
+
+% \renewcommand\cftchapafterpnum{\vskip 3pt}
+\setlength{\cftbeforechapskip}{4pt}
+
+% \renewcommand\cftsecafterpnum{\vskip 0pt}
+\setlength{\cftbeforesecskip}{1pt}
+
+\renewcommand\cftsubsecafterpnum{\vskip 1pt}
+% \setlength{\cftbeforesubsecskip}{1pt}
+
+
+% \setlength{\cftsecindent}{0em}
+% \setlength{\cftsubsecindent}{0em}
+% \setlength{\cftsubsubsecindent}{0em}
+
+% \setlength{\cftsecnumwidth}{3.5em}
+% \setlength{\cftsubsecnumwidth}{3.5em}
+% \setlength{\cftsubsubsecnumwidth}{3.5em}
+
+% https://tex.stackexchange.com/a/297657
+% \usepackage[figure,table]{totalcount}
+% \iftotalfigures
+%   \listoffigures
+% \fi
+% \iftotaltables
+%   \listoftables
+% \fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+}{} % ifthen workaround to avoid loading this in test file
+
+% horizontal / landscape pages
+% https://tex.stackexchange.com/a/354
+% \usepackage{pdflscape}
+\usepackage{lscape}
+% \begin{landscape}
+%   ...
+% \end{landscape}
+
+\usepackage{afterpage}
+% \afterpage{
+% }
+
+\usepackage{lipsum}
