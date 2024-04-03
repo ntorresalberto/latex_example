@@ -1,0 +1,248 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is a LaTeX template for Bachelor or Master theses at ZHAW, in accordance with the
+% guidelines provided here:
+% https://www.zhaw.ch/en/lsfm/study/studiweb/master-ls/masters-thesis/
+%
+%
+% This template is based on previous works by:
+% Steve Gunn (http://users.ecs.soton.ac.uk/srg/softwaretools/document/templates/)
+% Sunil Patel (http://www.sunilpatel.co.uk/thesis-template/)
+% Matteo Delucchi (https://github.com/matteodelucchi/ZHAW_thesis-template)
+%
+% University specific changes were made by:
+% Matteo Delucchi
+% Norman Juchler
+%
+% Template license:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+% DOCUMENT SPECIFICATION
+%----------------------------------------------------------------------------------------
+\documentclass[
+    11pt,                      % Default font size
+    %oneside,                  % One-side binding. Default: Two-side binding / alternating margins
+    english,                   % Language. Use ngerman for German (Neue Rechtschreibung)
+    singlespacing,             % Spacing option: singlespacing, onehalfspacing or doublespacing
+    %nolistspacing,            % Set spacing in lists to single
+    %draft,                    % Enable draft mode: no pictures, no links, overfull hboxes indicated
+    liststotoc,               % Include list of figures/tables/etc in the table of contents
+    %toctotoc,                 % Include the main table of contents to the table of contents
+    parskip,                  % Add vertical space between paragraphs
+    %nohyperref,               % Disable links in the entire document
+    headsepline,               % Show a horizontal line under the header
+    %chapterinoneline,         % Place the chapter title and chapter number on one line
+    consistentlayout,          % Have the same layout for special chapters:
+                               % declaration, abstract and acknowledgements
+]{MastersDoctoralThesis}
+
+% Uncomment the following lines to only include a subset of chapters.
+% This is useful for long documents, as typesetting takes a bit of time
+%\includeonly{
+%    Front/titlepage,
+%    Front/imprint,
+%    Front/abstract,
+%    %Front/declaration,
+%    %Front/acknowledgements,
+%    %Front/symbols,
+%    Chapters/Chapter1,
+%    %Chapters/Chapter2
+%    }
+
+
+%----------------------------------------------------------------------------------------
+% PREAMBLE: PACKAGES AND CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\input{preamble}
+\input{preamble2}
+
+
+%----------------------------------------------------------------------------------------
+% THESIS INFORMATION: MODIFY THIS SECTION!
+%----------------------------------------------------------------------------------------
+
+% The information below is used in the following parts:
+% - Title page
+% - Imprint
+% - Abstract / Zusammenfassung
+% - Meta information of PDF
+
+\thesistitle{Project Title}             % Thesis title,              command: \ttitle
+\thesistype{Track Module 1}             % Type of thesis (e.g. Master Thesis) \ttype
+\thesisdate{\today}                     % Date of submission                  \tdate
+% TODO
+\keywords{robotics, industry 4.0, computer science}
+                                        % Keywords for the thesis,            \keywordnames
+\author{Kevin Van Newton}                  % Your name,                          \authorname
+\degree{Doctor of Philosophy}          % Degree name,                        \degreename
+\studyprogram{Ecole Doctorale Sciences Physiques et de l'Ingénieur,\\ Automatique, Productique, Signal et Image, Ingénierie Cognitique}
+                                        % Study program                       \studyprog
+% TODO
+\studyprogramlink{https://www.zhaw.ch/en/lsfm/study/master/applied-computational-life-sciences/}
+                                        % Link to study program               \studyproglink
+
+\supervisorA{Dr. David Daney}       % Name of supervisor 1,               \supnameA
+\supervisorAmail{david.daney@inria.fr}         % Email address of supervisor 1,      \supmailA
+\supervisorAweb{https://auctus-team.gitlabpages.inria.fr/team-members/daviddaney/}  %            \supwebA
+\supervisorAinfo{                       % Formatted info about supervisor 1:  \supinfoA
+    \supnameA\\
+    Centre Inria de l'université de Bordeaux \\
+    Email: \href{mailto:\supmailA}{\supmailA}\\
+    Web: \href{\supwebA}{Link}
+}
+
+% Keep empty if there is no supervisor 2: \supervisorB{}
+\supervisorB{Dr. Vincent Padois}              % Name of supervisor 2,               \supnameB
+\supervisorBmail{vincent.padois@inria.fr}       % Email address of supervisor 2,      \supmailB
+\supervisorBweb{https://auctus-team.gitlabpages.inria.fr/team-members/vincentpadois/}                  % \supwebB
+\supervisorBinfo{                       % Formatted info about supervisor 2:  \supinfoB
+    \supnameB\\
+    Centre Inria de l'université de Bordeaux \\
+    Email: \href{mailto:\supmailB}{\supmailB}\\
+    Web: \href{\supwebB}{Link}
+}
+
+\university{University of Bordeaux}
+                                        % University name                     \univname
+% \universitygerman{Zürcher Hochschule für Angewandte Wissenschaften}
+%                                         % University, in German               \univnameger
+\universityfrench{Université de Bordeaux}
+
+\department{Ecole Doctorale Sciences Physiques et de l'Ingénieur}
+                                        % Department,                         \deptname
+\institute{Automatique, Productique, Signal et Image, Ingénierie Cognitique}
+                                        % Institute,                          \instname
+\group{AUCTUS -- Robots for humans at work}
+                                        % Research group                      \groupname
+
+% Links
+\universitylink      {https://www.u-bordeaux.fr/en}                   % \univlink
+% \universitylinkgerman{https://www.zhaw.ch/de/university/}                   % \univlinkger
+\universitylinkfrench{https://www.u-bordeaux.fr/}                   % \univlinkger
+\departmentlink      {https://ed-spi.u-bordeaux.fr/}                         % \deptlink
+\institutelink       {https://www.ims-bordeaux.fr/fr/} % \instlink
+\grouplink           {https://auctus-team.gitlabpages.inria.fr/} % \grplink
+
+
+
+\AtBeginDocument{
+\hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
+\hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
+\hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
+}
+
+\begin{document}
+\emergencystretch 3em %https://tex.stackexchange.com/a/9110
+\frontmatter                  % Roman page numbering for the pre-content pages
+\pagestyle{plain}             % Default to the plain heading style until the thesis style
+                              % is called for the body content
+
+
+%----------------------------------------------------------------------------------------
+% TITLE PAGE AND IMPRINT
+%----------------------------------------------------------------------------------------
+\include{Front/page_garde}
+% \include{Front/titlepage}
+\let\cleardoublepage\clearpage
+% \include{Front/imprint}
+
+
+%----------------------------------------------------------------------------------------
+% DECLARATION
+%----------------------------------------------------------------------------------------
+% Comment out this section if the declaration of originality from ZHAW is used.
+% \include{Front/declaration}
+% \cleardoublepage
+
+
+%----------------------------------------------------------------------------------------
+% ABSTRACT
+%----------------------------------------------------------------------------------------
+% \include{Front/abstract}
+% \include{Front/page_resume_FR_ENG}
+
+
+%----------------------------------------------------------------------------------------
+% ACKNOWLEDGEMENTS
+%----------------------------------------------------------------------------------------
+% \include{Front/acknowledgements}
+
+
+%----------------------------------------------------------------------------------------
+% LIST OF CONTENTS/FIGURES/TABLES PAGES
+%----------------------------------------------------------------------------------------
+% Comment out if any of the following is not needed:
+\tableofcontents  % Add main table of contents
+\listoffigures    % Add list of figures
+\listoftables     % Add list of tables
+\clearpage
+\printglossary[type=\acronymtype]
+\clearpage
+
+
+%----------------------------------------------------------------------------------------
+% ABBREVIATIONS / SYMBOLS
+%----------------------------------------------------------------------------------------
+% \include{Front/symbols}
+
+
+%----------------------------------------------------------------------------------------
+% DEDICATION
+%----------------------------------------------------------------------------------------
+% \dedicatory{For/Dedicated to/To my\ldots}
+
+
+%----------------------------------------------------------------------------------------
+% THESIS CONTENT - CHAPTERS
+%----------------------------------------------------------------------------------------
+\mainmatter % Begin numeric (1,2,3...) page numbering
+\pagestyle{thesis} % Return the page headers back to the "thesis" style
+
+% Include the chapters of the thesis as separate files from the Chapters folder
+% Uncomment the lines as you write the chapters
+
+% \include{Chapters/Chapter1_template}
+% \include{Chapters/Chapter2_template}
+
+\include{Chapters/Chapter1}    % INTRO
+
+\include{Chapters/Chapter2}    % LINEAR POSE
+% \include{Chapters/Chapter2p} % ark
+% \include{Chapters/Chapter2f} % ex fundamentals
+
+\include{Chapters/Chapter3}    % ICRA
+% \include{Chapters/Chapter31} % icra
+
+\include{Chapters/Chapter4}    % IROS
+% \include{Chapters/Chapter32} % iros
+
+\include{Chapters/Chapter5}    % MPC POLYTOPES
+% \include{Chapters/Chapter4p} % journal
+
+\include{Chapters/Chapter6}    % CONCLUSIONS
+
+
+
+%----------------------------------------------------------------------------------------
+% THESIS CONTENT - APPENDICES
+%----------------------------------------------------------------------------------------
+\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
+
+% Include the appendices of the thesis as separate files from the Appendices folder
+% Uncomment the lines as you write the Appendices
+\include{Appendices/AppendixTemplate}
+% from https://www.zhaw.ch/en/lsfm/study/studiweb/master-ls/masters-thesis/
+% \include{Appendices/AppendixB}
+%\include{Appendices/AppendixC}
+% \include{Appendices/DeclarationOfOriginalityZHAW}
+
+
+%----------------------------------------------------------------------------------------
+% BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\printbibliography[heading=bibintoc]
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

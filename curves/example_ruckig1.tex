@@ -1,0 +1,38 @@
+\begin{tikzpicture}
+    \begin{axis}[
+        % width=12cm,
+        height=5cm,
+        % axis lines=center,
+        axis lines=left,
+        no marks,
+        scale only axis=true,
+        grid=both,
+        ylabel style={align=center},
+        ylabel style={yshift=0cm,rotate=-90},
+        ymax=1.03,
+        ymin=-1.03,
+        % xmin = 0,
+        % xmax= 0.52,
+        xlabel=\empty,
+        xtick distance={0.1},
+        xticklabels={,,},
+        scaled y ticks=false,
+        scaled x ticks=false,
+        ytick pos=left,
+        legend pos= outer north east,
+        ytick distance={0.2},
+        legend cell align={left},
+        legend style={at={(1.0,.01)}, anchor=south east, draw=none, fill=none},
+        % ylabel=$\twist$ \\ $(\text{m/s})$
+        ]
+        \addplot[color=forestgreen,ultra thick] table [x=t,y=p,col sep=comma] {data/example_ruckig1.csv};
+        \addplot[color=steelblue, ultra thick] table [x=t,y=v,col sep=comma]  {data/example_ruckig1.csv};
+        \addplot[color=maroon, ultra thick] table [x=t,y=a,col sep=comma]     {data/example_ruckig1.csv};
+        % \addplot[color=forestgreen,line width=2pt] table [x=t,y=p,col sep=comma] {data/example_ruckig1.csv};
+        % \addplot[color=steelblue, line width=2pt] table [x=t,y=v,col sep=comma] {data/example_ruckig1.csv};
+        % \addplot[color=maroon, line width=2pt] table [x=t,y=a,col sep=comma] {data/example_ruckig1.csv};
+        \addlegendentry{$s$}
+        \addlegendentry{$\dot{s}$}
+        \addlegendentry{$\ddot{s}$}
+    \end{axis}
+\end{tikzpicture}

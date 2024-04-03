@@ -1,0 +1,598 @@
+% !TEX root = ../main.tex
+
+\chapter{Quadratic Programming}
+\label{sec:qp}
+
+Quadratic Programming is a technique that permits optimizing some
+vector variable~$\x$ with respect to some second order cost function~$f(\x)$ and
+some linear equality and inequality constraints (lower/upper bounds).
+
+The canonical QP optimization problem is formulated as:
+\begin{gather}
+  \begin{array}{cc}
+    \label{eqn:qp_canonical}
+    \x^{opt}=
+    \underset{\x}{\arg \min } & \frac{1}{2} \x^{T} \Q \x
+                                +\gbold^{T} \x+r  \\
+    \text { s.t. } & \Clb \leq \C_i \x \leq \Cub \\
+                              & \lb \leq \x \leq \ub \\
+                              & \C_e \x=\dbold
+  \end{array}
+\end{gather}
+where:
+
+\items{
+\item $\x \in R^{n\times 1}$ designates the optimizing variable (also referred to as
+  the decision variable).
+
+\item $\Q \in
+  \coordspace{R}{n\times n}$ contains the quadratic cost function coefficients.
+
+\item $\gbold \incoordspace{R}{1\times n}$ refers to the linear
+  coefficients, also referred to as the gradient vector.
+\item $r \in \mathbb{R}$ refers to a constant cost term, independent of the
+  decision variable, and so it can be neglected, as it
+  doesn't affect the result of the optimization.
+\item The \emph{inequality constraints} are expressed as a linear system described
+  with the lower and upper bounds vectors~${\Clb, \Cub}$ and the
+  coefficients matrix~$\A$ that relates them to the optimizing variable. This
+  constitutes the most general set of constraints and is often used to formulate
+  the other onces. Some solvers only offer this alternative (and equivalent) formulation:
+  \begin{gather}
+        \left[\begin{array}{c}
+                \C_i \\
+                -\C_i
+              \end{array}\right] \x \leq
+    \left[\begin{array}{c}
+            \Cub \\
+            -\Clb
+          \end{array}\right]
+    \end{gather}
+\item The \emph{equality constraints} are expressed as a linear system described
+  with the vector~$\dbold$ and the coefficients matrix~$\C$ that relates them
+  to the optimizing variable. They can be embedded into the inequality
+  constraints by employing~${\dbold}$ both as the lower and upper bounds.
+\item Finally, the \emph{variable bounds} express the decision variable
+  lower~${\lb}$ and upper~${\ub}$ bounds. These can be included into the
+  inequality constraints by adding an identity matrix to~${\C}$.
+}
+
+\textbf{Embedded Constraints}
+
+Often, \gls{qp} solvers offer only the linear inequality constraints, as the others can
+be embedded in them for simplification:
+\begin{gather}
+  \left[\begin{array}{c}
+          \lb \\
+          \Alb \\
+          \dbold
+        \end{array}\right] \leq
+    \left[\begin{array}{c}
+            \eye[ n ] \\
+            \A \\
+            \C_e
+          \end{array}\right] \x \leq
+    \left[\begin{array}{c}
+            \ub \\
+            \Aub \\
+            \dbold
+          \end{array}\right]
+\end{gather}
+
+\textbf{Simplified formulation}
+
+Then, it is possible to arrive at a simplified canonical formulation:
+\begin{gather}
+  \begin{array}{cc}
+    \x^{opt}=
+    \underset{\x}{\arg \min } & \frac{1}{2} \x^{T} \Q \x
+                                +\gbold^{T} \x \\
+    \text { s.t. } & \Alb \leq \A \x \leq \Aub
+  \end{array}
+\end{gather}
+
+\section{Weighted Least Square}
+\label{sec:leastsquare_qp}
+
+The following least-square optimization problem can be reformulated in a standard quadratic problem form as in~\labelcref{eqn:qp_canonical}:
+\begin{gather}
+  \label{eqn:qp_least_squares}
+  \underset{\x}{\arg \min }\quad ||\E\x - \bbold||^2_{\W}
+\end{gather}
+where~${\W}$ is a positive semi-definite matrix containing weights the
+optimization variable.
+
+Given:
+\begin{align}
+  \|\E \x-\bbold\|_{\W}^{2} &=(\E \x-\bbold)^{T}\W(\E \x-\bbold) \\
+                            &=\x^{T} \E^{T}\W\E \x
+                              -2 \bbold^{T}\W \E \x
+                              +\bbold^{T} \bbold
+\end{align}
+then we can express~\labelcref{eqn:qp_least_squares} in the initial formulation of the QP optimization~\labelcref{eqn:qp_canonical}:
+\begin{gather}
+  \Q = 2\E^{T} \W \E, \qquad
+  \g^T = -2 \bbold^{T} \W \E, \qquad
+  r = \bbold^{T} \bbold
+\end{gather}
+A commonly used case of this least squares optimization is for when the weight
+matrix is an identity~${\W=\eye}$ (giving equal weight to all elements in the
+decision variable):
+\begin{gather}
+  \underset{\x}{\arg \min }\quad ||\E\x - \bbold||^2
+\end{gather}
+
+\chapter{Discretization of Continuous LTI systems}
+\label{sec:discretization_lti}
+
+A dynamic system can be parameterized with state~${\x\incoordspace{R}{n}}$ and
+input~${\uinput\incoordspace{R}{m}}$ vectors (where n is the size of the state
+and m the size of the input variables). The state vector is the smallest subset
+of system variables that contains all the information required to describe the
+system at some time instant. The input variable corresponds to the decision
+variable used to drive the system to some desired or target state.
+
+Given some non-linear system dynamics described with~${\f(\x,\uinput)}$, the
+continuous state-space system representations is:
+\begin{align}
+  \xdot(t) &= \A_c(t) \x(t) + \: \B_c(t)\uinput(t) \label{eqn:ss_differential}\\
+  \y(t) &= \C(t) \x(t) \:\; + \: \D(t)\uinput(t) \label{eqn:ss_continuous_observer}\\
+  \text{with:} \qquad \qquad& \nonumber \\
+  \A_c(t)=&\frac{\delta \f(\x,\uinput)}{\delta \x}  \qquad\B_c(t)=\frac{\delta \f(\x,\uinput)}{\delta \uinput}
+\end{align}
+where:
+% \begin{tabularx}{\textwidth}{>{\raggedleft\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabularx}{\linewidth}{>{\raggedleft\arraybackslash}X>{\raggedright\arraybackslash}p{0.8\linewidth}}
+  ${\xdot, \x}$: & represent the system state and its derivative \tabularnewline
+  $\uinput$:& represents the system input \tabularnewline
+  $\y$: & represents the system observed state  \tabularnewline
+  ${\A_c,\B_c}$: &LTI matrices that express the relation between the system state derivative and its state and input \tabularnewline
+    ${\C,\D }$: &LTI matrices that express the relation between the system \emph{observed} state and its state and input
+\end{tabularx}
+% \begin{center}
+%   \begin{tabularx}{3in}{l|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{0.725in}}
+%     \toprule
+%     \textbf{Source} & \textbf{Targets}          &\textbf{Locations}
+%     \\\midrule[\heavyrulewidth]
+%     09  & 99, 199, 299, 399, 499, 599, 699, 799 & boxes 5, 119, 135--136
+%     \\\hline
+%     200 & 399   & box 23
+%     \\\bottomrule
+%   \end{tabularx}
+% \end{center}
+
+The solution to the differential equation is:
+\begin{gather}
+  \x(t) = e^{\A_ct}\x(0) + \int_{0}^{t}e^{\A_c(t-\tau)}\B_c(\tau)\delta\tau \label{eqn:ss_solution}
+\end{gather}
+
+\section{Discrete-time State-space}
+
+The time-discrete equivalent of~\labelcref{eqn:ss_differential} and~\labelcref{eqn:ss_continuous_observer} are:
+\begin{align}
+  \x_{k+1} &= \A_d\x_k + \B_d\uinput_k \\
+  \y_k &= \C\x_k + \D\uinput_k
+\end{align}
+Note that for the general case of a non-linear system, all these matrices also
+depend on the state. This means that, the system needs to be linearized at some
+time instant~${t_n}$ and then~${\A_{d,n}}$ can be assumed constant for a limited
+time window. The same conclusions can be applied for~${\B, \C, \D}$.
+
+
+Using~\labelcref{eqn:ss_solution} with a sampling period of $T_s$, we arrive at the
+exact solutions:
+\begin{align}
+  \A_d &= e^{\A_cT_s} \\
+  \B_d &= \int_{0}^{T_s}e^{\A_c\tau}\delta\tau\B_c = \K \B_c \label{eqn:ss_bdiscrete} \\
+  \text{ with } & \K = \A_c^{-1}(e^{\A_cT_s} - \eye[ n ])
+\end{align}
+It is important to note that~\labelcref{eqn:ss_bdiscrete} is defined even if
+$\A_c^{-1}$ does not ($\A_c$ not reversible), as shown by developing the expressions
+though their taylor series:
+\begin{align}
+  \A_d &= \eye[ n ] + \A_c T_s + \frac{(\A_c T_s)^2}{2} ... = \sum^{\infty}_{n=0} \frac{(\A_c T_s)^n}{n!} \\
+  \K &= \A_c^{-1}(\sum^{\infty}_{n=0} \frac{(\A_c T_s)^n}{n!}  - \eye[ n ]) \\
+       &= \A_c^{-1}(\cancel{\eye[ n ]} + \A_c T_s + \frac{(\A_c T_s)^2}{2} ...  - \cancel{\eye[ n ]}) \\
+       &= \A_c^{-1}\sum^{\infty}_{n=1} \frac{(\A_c T_s)^n}{n!} \\
+       &= \sum^{\infty}_{n=1} \frac{\A_c^{n-1} T_s^n}{n!}
+\end{align}
+
+
+\chapter{Summary: Velocity-based Pose Tracking as a Quadratic Program}
+\label{sec:ik_solver}
+
+The inverse kinematic problem consists of finding the robot configuration
+satisfying some operational-space position and orientation. This section
+introduces a way to solve this problem for a robot that admits being controlled
+by its joint velocities.
+
+
+This controller is similar to the one in~\cite{joseph:hal-02434905}. It is
+formulated as a linearly constrained~\gls{qp} that optimizes for the joint
+velocity; the main difference being the added generic linear constraints
+in~\labelcref{eqn:velqp_linear_constraints} that will be detailed shortly. The resulting
+\gls{qp} formulation is:
+\begin{gather}
+  \qdot^{\optt} = \argmin_{\qdot} \: f_{\text{main}}(\qdot)
+  + w_{\reg}\;f_{\reg}(\qdot) \\
+  \text{s.t.} \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \nonumber \\
+  \qquad\qdotlb \leq \qdot \leq \qdotub \\
+  \label{eqn:velqp_joint_constraint} \qquad \qdot \in \C_{\q} \\
+  \label{eqn:velqp_jointacc_constraint} \qquad \qdot \in \C_{\qddot} \\
+  \label{eqn:velqp_linear_constraints} \qquad \Alb \leq \A\qdot \leq \Aub \\
+  \qquad \qdot, \qdotlb, \qdotub \incoordspace{R}{n} \nonumber \\
+  \text{with:} \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \nonumber \\
+  \label{eqn:velqp_qconstraints} \qquad \C_{\q} = \left\{\qdot \incoordspace{R}{n}
+    \,\mid\, \qdot \in \left[\frac{\qlb-\q_k}{\Delta t},\frac{\qub-\q_k}{\Delta
+        t}\right]\right\} \\
+  \label{eqn:velqp_qaccconstraints} \qquad \C_{\qddot} = \left\{\qdot \incoordspace{R}{n}
+    \,\mid\, \qdot \in \left[\qdot_k
+      + \qddotlb \Delta t,\qdot_k + \qddotub\Delta t\right]\right\} \\
+  \label{eqn:velqp_main} \qquad f_{\text{main}}(\qdot) = || {^B}\twist^{*} - {^B}\jac(\q_k) \qdot ||^2_2 \\
+  \label{eqn:velqp_pd} \qquad
+  \myarray{ccc}{
+    {^B}\twist^* = \K_p {^B}\e + {^B}\twist^{r}
+    & \qquad
+    & \e, \twist \in \sethree \\
+    {^B}\e = \log(\pose_k^{-1}\pose^{r})
+    &\qquad &\pose\in\SEthree
+  } \\
+  \label{eqn:velqp_reg} \myarray{c}{
+    \qquad f_{\reg}(\qdot) = ||\qdot_{\reg}-\qdot ||^2_2 \\
+    \qquad \qdot_{\reg} = \K_{\q} (\q_{\reg} - \q) \\
+    \qquad \q_{\reg} = \frac{(\q_M - \q_m)}{2}
+  }
+\end{gather}
+where~${B}$ implies the corresponding quantity is expressed in the \emph{body frame} (see
+\Cref{sec:conventional_frames2}). Additionally:
+\items{
+\item $\qdot^{\opt}$ corresponds to the optimal~${\qdot}$ that minimizes the
+  cost function; this implies it will be applied in the next step
+  as~${\qdot_{k+1}}$. On the other hand, the current states of the robot
+  referred to as~${\pose_k, \q_k, \qdot_k}$ and are used
+  in~\labelcref{eqn:velqp_qconstraints},~\labelcref{eqn:velqp_qaccconstraints},~\labelcref{eqn:velqp_main},~\labelcref{eqn:velqp_pd} and~\labelcref{eqn:velqp_pd}.
+\item ${f_{\text{main}}(\qdot)}$ in~\labelcref{eqn:velqp_main} designates the main task cost function. In this case,
+  it corresponds to a pose tracking task that minimizes the distance between
+  some desired twist~${\twist^{*}}$ (see~\labelcref{eqn:velqp_pd} explained below) and the robot current
+  twist, which is computed as a function of the optimizing variable (the joint
+  velocities) through the robot Jacobian~${\jac(\q)}$.
+\item $\twist^*$ from~\labelcref{eqn:velqp_main} is defined in~\labelcref{eqn:velqp_pd} as a
+  \gls{pd} from a trajectory providing a reference pose~${\pose^r}$ and
+  twist~${\twist^r}$. The proportional gain~${\K_p}$ provides a way to modulate
+  the correction from the error term. Finally,~${\e}$ is constructed as the
+  desired twist displacement required to correct the robot pose
+  from~${\pose}$ to~${\pose^r}$.
+\item ${f_{\reg}(\qdot)}$ is a regularisation task or function that helps uniquely
+  determine an optimal solution in redudant robots by acting on the extra
+  degrees of freedom. In this case, the task tries to maintain a configuration
+  close to the robot mean position relative to its bounds. The details can be
+  found in~\cite{joseph:hal-02434905}. Then~${w_{\reg}}$
+  is chosen small enough not to affect the main task.
+\item ${\C_{\q}}$ in~\labelcref{eqn:velqp_qconstraints} offers one way to
+  implement~\labelcref{eqn:velqp_joint_constraint} via the first order taylor
+  expansion on the current robot configuration~${\q_k}$,
+  establishing a relation between the joint bound limits (${\qlb, \qub}$) and the joint velocities.
+\item Similarly,~${\C_{\qddot}}$ in~\labelcref{eqn:velqp_qaccconstraints} is one possible
+  implementation of~\labelcref{eqn:velqp_jointacc_constraint}; in this case, it exploits the first order taylor
+  expansion of the current joint velocity~${\qdot_k}$ to incorporate the joint
+  acceleration limits (${\qddotlb, \qddotub}$) as a function of the decision
+  variable, the joint velocities.
+\item Finally,~\labelcref{eqn:velqp_linear_constraints} offers a way to incorporate
+  linear constraints. For instance, it can be used to express workspace-related
+  limits like the geometric space or, for example, the twist constraints can be
+  formulated as:
+  \begin{gather}
+    \twist_{\lb} \leq \jac\qdot \leq \twist_{\ub}
+  \end{gather}
+}
+
+\chapter{Summary: Torque-based Pose Tracking as a Quadratic Program}
+\label{sec:id_solver}
+
+An inverse kinematics solver as a \gls{qp} is presented in
+\Cref{sec:ik_solver}. This section extends the previous strategy to
+formulate an inverse dynamics solver. While both problems involve working
+backwards to solve for unknowns, inverse kinematics focuses on the geometric
+view of the problem, solving for the joint angles necessary to achieve a certain
+end-effector pose, ignoring the required forces or torques. In contrast, inverse
+dynamics deals with the problem of finding the torques and forces required for
+an end-effector motion. This accounts for the system dynamic properties such as
+the mass, inertia, external forces, etc.
+
+
+The controller presented here is similar to the one
+in~\cite{joseph2018towards}. It is designed for torque-controlled robots. By
+exploiting the robot dynamics model (see~\Cref{sec:robot_dyn}), we can
+formulate the joint accelerations as a function of the joint torques.
+Furthermore, the Cartesian spatial acceleration can then be related to the joint
+accelerations through the robot Jacobian, enabling a \gls{qp} formulation of  the
+task-space tracking problem:
+\begin{gather}
+\label{eqn:id_solver}
+  \tautorque^{\optt}  = \argmin_{\tautorque} \: f_{\text{main}}(\tautorque) +
+  w_{\reg} \; \f_{\reg}(\tautorque) \\
+  \text{s.t.} \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \nonumber \\
+  \qquad\taulb \leq \tautorque \leq \tauub \\
+  \label{eqn:torqp_joint_constraint} \qquad \tautorque \in \C_{\q} \\
+  \label{eqn:torqp_jointvel_constraint} \qquad \tautorque \in \C_{\qdot} \\
+  \label{eqn:torqp_jointtor_constraint} \qquad \tautorque \in \C_{\tautorquedot} \\
+  \label{eqn:torqp_linear_constraints} \qquad
+  \myarray{c}{
+    \Alb \leq \A\qdot \leq \Aub \\
+    \tautorque, \taulb, \tauub \incoordspace{R}{n}
+  } \\
+  \text{with:} \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \nonumber \\
+  \label{eqn:torqp_accdyn}
+  \qddot(\tautorque) = \imat(\q_k)^{-1}(\tautorque + \biasforces(\q_k,\qdot_k)) \\
+  % \myarray{c}{
+  %   \qddot(\tautorque) = \imat(\q_k)^{-1}(\tautorque + \biasforces(\q_k,\qdot_k)) \\
+  %   \qddotub = \min (\qddot(\taulb), \qddot(\tauub)) \\
+  %   \qddotlb = \max (\qddot(\taulb), \qddot(\tauub))
+  % } \\
+  \label{eqn:torqp_qconstraints} \qquad \C_{\q} = \left\{\qddot(\tautorque) \incoordspace{R}{n}
+    \,\mid\, \qddot(\tautorque) \in \left[2\frac{(\qlb-\q_k-\qdot_k \Delta t)}{\Delta t^2},
+      2\frac{(\qub-\q_k-\qdot_k \Delta t)}{\Delta t^2}\right]\right\} \\
+  \label{eqn:torqp_qvelconstraints} \qquad \C_{\qdot} = \left\{\qddot(\tautorque) \incoordspace{R}{n}
+    \,\mid\, \qddot(\tautorque) \in \left[\frac{(\qdotlb-\qdot_k)}{\Delta t},
+      \frac{(\qdotub-\qdot_k)}{\Delta t}\right]\right\} \\
+  \label{eqn:torqp_qtorconstraints} \qquad \C_{\tautorquedot} = \left\{\tautorque \incoordspace{R}{n}
+    \,\mid\, \tautorque \in \left[\tautorque_k
+      + \taudotlb \Delta t,\tautorque_k + \taudotub\Delta t\right]\right\} \\
+  \label{eqn:torqp_main} \qquad \myarray{c}{
+    f_{\text{main}}(\tautorque) = || {^B}\twistd^{*} - \twistd(\tautorque) ||^2_2 \\
+    \twistd(\tautorque) = \jac(\q_k)\qddot(\tautorque)
+  } \\
+  \qquad \myarray{ccc}{
+  {^B}\twist^* = \K_p {^B}\e + \K_d {^B}\edot
+  + {^B}\twistd^{r}
+           & \qquad
+           & \e, \edot, \twist, \twistd \in \sethree \\
+  {^B}\e = \log(\pose_k^{-1}\pose^{r})
+           & \qquad
+           & \pose\in\SEthree  \\
+           {^B}\edot = {^B}\twist^{r}-{^B}\twist_k
+           & \qquad
+           &  \\
+         } \label{eqn:torqp_pd} \\
+  \label{eqn:torqp_reg} \qquad f_{\reg}(\tautorque) = ||\tautorque_{\reg}-\tautorque ||^2_2
+\end{gather}
+where~${B}$ implies the corresponding quantity is expressed in the \emph{body frame} (see
+\Cref{sec:conventional_frames2}). Additionally:
+\items{
+\item $\tautorque^{\opt}$ corresponds to the optimal~${\tautorque}$ that minimizes the
+  cost function; this implies it will be applied in the next step
+  as~${\tautorque_{k+1}}$. On the other hand, the current states of the robot
+  referred to as~${\pose_k, \q_k, \qdot_k, \tautorque_k}$ and are used
+  in~\labelcref{eqn:torqp_accdyn},~\labelcref{eqn:torqp_qconstraints},~\labelcref{eqn:torqp_qtorconstraints},~\labelcref{eqn:torqp_main} and~\labelcref{eqn:torqp_pd}.
+\item ${f_{\text{main}}(\tautorque)}$ in~\labelcref{eqn:torqp_main} designates the main
+  task cost function. In this case, it corresponds to a pose tracking task that
+  minimizes the distance between some desired twist derivative~${\twistd^{*}}$
+  (analogous to a rigid body motion acceleration, see~\labelcref{eqn:torqp_pd} explained
+  below) and the robot current spatial acceleration, which is computed as a
+  function of the optimizing variable (the joint torques) through the robot
+  dynamics model in~\labelcref{eqn:torqp_accdyn}.
+\item $\twist^*$ from~\labelcref{eqn:torqp_main} is defined in~\labelcref{eqn:torqp_pd} as a
+  \gls{pd} term from a trajectory providing a reference pose~${\pose^r}$, a
+  twist~${\twist^r}$ and a spatial acceleration~${\twistd^r}$ (the latter used
+  as a feed forward term). The proportional gain~${\K_p}$ provides a way to
+  modulate the correction from the error term~${\e}$, which is constructed as
+  the desired twist displacement required to correct the robot pose
+  from~${\pose}$ to~${\pose^r}$; in the same way, the derivative gain~${\K_d}$
+  modulates the twist error~${\edot}$.
+\item ${f_{\reg}(\tautorque)}$ is a regularisation task or function that helps
+  uniquely determine an optimal solution in redudant robots by acting on the
+  extra degrees of freedom. In this case, the task tries to maintain a
+  configuration close to the robot mean position relative to its bounds without
+  affecting the main task (because~${w_{\reg}}$ is chosen small enough not to
+  affect it). Then~$\tautorque_{\reg}$ can be chosen in different ways depending
+  on the targeted application; here, it is chosen to ensure the convergence of
+  the robot configuration to a neutral configuration~$\q_{\reg}$. The servoing
+  of this configuration can be expressed at the joint torque level using a
+  \gls{pd} controller such that:
+  \begin{gather}
+    \tautorque_{\reg} = \K_{\q}(\q_{\reg}-\q) - \K_{\qdot} \qdot
+  \end{gather}
+  with~$\K_{\q}$ and~$ \K_{\qdot}$ positive proportional and derivative gains.
+\item ${\C_{\q}}$ in~\labelcref{eqn:torqp_qconstraints} offers one way to
+  implement~\labelcref{eqn:torqp_joint_constraint} via the second order taylor
+  expansion on the current robot configuration~${\q_k}$,
+  establishing a relation between the joint bound limits (${\qlb, \qub}$) and
+  the joint accelerations (and indirectly, the joint torques).
+\item Similarly,~${\C_{\tautorquedot}}$ in~\labelcref{eqn:torqp_qtorconstraints} is one
+  possible implementation of~\labelcref{eqn:torqp_jointtor_constraint}; in this case, it
+  exploits the first order taylor expansion of the current joint
+  torque~${\tautorque_k}$ to incorporate the joint torque derivative limits
+  (${\taudotlb, \taudotub}$) as a function of the decision variable, the joint
+  torque.
+\item Finally,~\labelcref{eqn:torqp_linear_constraints} offers a way to incorporate
+  linear constraints. For instance, it can be used to express workspace-related
+  limits like the geometric space or, for example, the spatial acceleration
+  constraints can be formulated as:
+  \begin{gather}
+    \twistd_{\lb} \leq \jac\qddot(\tautorque) \leq \twistd_{\ub}
+  \end{gather}
+}
+
+
+Given the interpolated first step of the trajectory computed by the~\gls{mpc},
+task space inverse dynamics has to be performed to compute the input joint
+torque for the robot.
+
+Feeding the inverse dynamics solver with the desired
+acceleration computed by the~\gls{mpc} may sound tempting. Nevertheless, the
+feedback provided by the closed-loop~\gls{mpc} is, partly due to the
+interpolated output, not efficient enough to properly reject tracking errors
+related to the inaccuracies in the model of the robot.
+
+These inaccuracies are
+mostly related to dry friction at the joint level, imperfectly rejected by the
+lower-level torque control loop in most robots. As a consequence, a \gls{pd}
+controller including a feed-forward term in acceleration is used to compute a
+corrected desired acceleration.
+
+For convenience and to further clarify how the different components are
+connected, this Section revisits some of the concepts previously introduced in
+\Cref{sec:inverse_dynamics}:
+\begin{gather}
+\label{eqn:pd}
+\twistd^* = \K_p \log(\pose^{-1}\pose_{\mpc})
+  + \K_d (\twist_{\mpc}-\twist) + \twistd_{\mpc}
+\end{gather}
+where~${\pose_{\mpc}, \twist_{\mpc},\twistd_{\mpc}}$ are respectively the
+interpolated desired pose, twist and acceleration outputted by
+the~\gls{mpc};~${\pose, \twist}$ are the measured pose and twist of the robot
+and~$\K_p$ and~$\K_d$ are positive proportional and derivative gains.
+
+Given this control acceleration, one can solve task-space inverse dynamics under
+constraints through a \gls{qp} formulation, similar to the one
+in~\cite{joseph2018towards}.
+
+\chapter{Smooth stopping trajectory}
+\label{sec:stopping_strategy}
+
+The smooth stopping analysis contemplates two stages in the trajectory, as
+depicted in~\Cref{fig:stopping_with_reversing} and~\Cref{table:stopping_stages}.
+
+
+\section{Acceleration Reversing Stage}
+
+When the initial acceleration and velocity are in the same sens.
+This considers the two following starting conditions:
+{
+\begin{align}
+  \smaller
+  \circled{1} &=
+\begin{cases}
+      & 0 \leq a_k \leq a_M \\
+      & 0 \leq v_k \leq v_M
+\end{cases},
+& \circled{2} =
+\begin{cases}
+      & a_M \leq a_k \leq 0 \\
+      & \, v_M \leq v_k \leq 0
+\end{cases}
+\end{align}
+}
+
+yielding:
+{
+\smaller
+\newcommand\longest[0]{
+-v_k t - \frac{a_k t^2}{2} + \frac{j_Mt^3}{6}
+}
+\begin{align}
+  \smaller
+  j_R (t) &=
+\begin{cases}
+      \mathrlap{0} \hphantom{\longest} & t=0 \\
+      j_M & 0 < t < t_R \\
+      0 & t = t_R
+\end{cases} \\
+a_R (t) &=
+\begin{cases}
+    \mathrlap{-a_k} \hphantom{\longest} & t=0 \\
+    -a_k + j_M t & 0 < t < t_R \\
+    0 & t = t_R
+\end{cases}\\
+v_R (t) &=
+\begin{cases}
+      \mathrlap{-v_k} \hphantom{\longest} & t=0 \\
+      -v_k - a_k t + \frac{j_Mt^2}{2} &  0< t\leq t_R
+\end{cases}\\
+\Delta p_R (t) &=
+\begin{cases}
+    0 & t=0 \\
+    \longest & 0< t\leq t_R
+\end{cases}
+\end{align}
+}
+
+and finally:
+\begin{align}
+t_R  = \frac{a_k}{j_M},&
+\quad v_R(t_R) = -v_k -\frac{a_k^2}{2j_M} \\
+\rightarrow \Delta v_R (t_R) &= v_k- v_R(t_R) \\
+\rightarrow \Delta p_R (t_R) &= -v_k \frac{a_k}{j_M}
+- \frac{2a_k^3}{6j_M^2}
+\end{align}
+
+
+\section{Deceleration Stage}
+
+When the initial  acceleration is zero or in the opposite sens of the initial
+velocity. Note that if an acceleration reversing stage was necessary,
+then~${a_k=0, v_k=v_R(t_R)}$.
+{
+\smaller
+\newcommand\longest[0]{\Delta p_D(t_{12}) + v_D(t_{12})t + \frac{a_M t^2}{2} - \frac{j_M t^3}{6}}
+\begin{align}
+j_D (t) &=
+\begin{cases}
+      0 & t=0 \\
+      j_M & 0 < t < t_1 \\
+      0 & t_1 \leq t < t_{12} \\
+      -j_M & t_{12} \leq t  < t_{123} \\
+      \mathrlap0\hphantom{\longest}& t_{123} \leq t
+\end{cases}\\
+a_D (t) &=
+% \left\lbrace\,\begin{array}{@{}r@{\quad}l@{}r@{}}
+\begin{cases}
+      a_k & t=0 \\
+      a_k + j_M t & 0 < t < t_1 \\
+      a_M & t_1 \leq t \leq t_{12} \\
+      a_M -j_M t & t_{12} < t < t_{123} \\
+      \mathrlap0\hphantom{\longest}& t_3 \leq t
+\end{cases}\\
+% \end{array}\\
+v_D (t) &=
+\begin{cases}
+      -v_k & t=0 \\
+      -v_k + a_k t + \frac{j_M t^2}{2} & 0 < t\leq t_1 \\
+      v_D(t_1)+a_Mt & t_1 < t \leq t_{12} \\
+    v_D(t_{12}) + a_M t - \frac{j_M t^2}{2}  & t_{12} < t < t_{123} \\
+\mathrlap0\hphantom{\longest}& t_{123} \leq t
+\end{cases}\\
+\Delta p_D (t) &=
+\begin{cases}
+     0 & t=0 \\
+    -v_k t - \frac{j_Mt^3}{6} & 0 < t\leq t_1 \\
+    \Delta p_D(t_1) + v_D(t_1)t + \frac{a_Mt^2}{2} & t_1 < t \leq t_{12} \\
+    \longest
+    & t_{12} < t \leq t_{123} \\
+      \Delta p_D(t_{123}) & t_{123} < t
+\end{cases}
+\end{align}
+}
+
+where:
+\begin{align}
+  \smaller
+   t_{12} = t_1 + t_2, & \quad t_{123} = t_1 + t_2 + t_3, \quad
+   t_1 = \frac{a_M - a_k}{j_M}, \quad t_3 = \frac{a_M}{j_M} \\
+   \Rightarrow \Delta v_D(t_{123}) &= \int_{0}^{t_{123}} a_D(t) \,dt - v_k \\
+    &= a_k t_1 + \frac{j_M t_1^2}{2} +a_Mt_{12} + a_M t_{123} - \frac{j_M t_{123}^2}{2} \\
+    \Rightarrow \Delta p_D(t_{123}) &= \Delta p_D(t_{12}) + v_D(t_{12})t_{123} + \frac{a_M t_{123}^2}{2} - \frac{j_M t_{123}^3}{6} \\
+    = &\;\underbrace{\Delta p_D(t_1) + v_D(t_1)t_{12} + \frac{a_Mt_{12}^2}{2}}_{\Delta p_D(t_{12})}
+     + \underbrace{(v_D(t_1) + a_M t_{12})}_{v_D(t_{12})} t_{123} \nonumber\\
+    + \frac{a_M t_{123}^2}{2} &- \frac{j_M t_{123}^3}{6} \\
+    = & \; \underbrace{-v_k t_1 - \frac{j_M t_1^3}{6}}_{\Delta p_D(t_1)}
+        + \underbrace{(v_D(t_1)+a_Mt_1)}_{v_D(t_1)}t_{12} + \frac{a_Mt_{12}^2}{2} \nonumber\\
+  + \frac{a_M t_{123}^2}{2}    &- \frac{j_M t_{123}^3}{6}   +( \underbrace{-v_k + a_k t_1 + \frac{j_M t_1^2}{2}}_{v_D(t_1)} + a_M t_{12}) t_{123} \\
+  = & \; -v_k t_1 - \frac{j_M t_1^3}{6}
+      + (\underbrace{-v_k t_1 - \frac{j_Mt_1^3}{6}}_{v_D(t_1)}+a_Mt_1)t_{12} + \frac{a_Mt_{12}^2}{2} \nonumber\\
+  & + \frac{a_M t_{123}^2}{2} - \frac{j_M t_{123}^3}{6}   +( -v_k + a_k t_1 + \frac{j_M t_1^2}{2} + a_M t_{12}) t_{123}
+\end{align}
+
+\textbf{Two cases considered:}
+
+\begin{align}
+\circled{1}  \quad 0\leq a_k \leq a_m, & \quad v_k \leq \frac{2 a_m^2 - a_k^2}{2j_M} \\
+  \quad t_3 = \frac{a_m}{j_m}, & \quad t_1 = \frac{a_m - a_k}{j_m} \\
+\shortintertext{
+Only a triangular trajectory is required.
+}
+\circled{2}  \quad 0\leq a_k, & \quad v_k > \frac{2 a_m^2 - a_k^2}{2j_M} \\
+\shortintertext{
+  A full TAP trajectory is required.
+}
+\end{align}

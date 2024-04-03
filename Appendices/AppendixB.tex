@@ -1,0 +1,425 @@
+% !TEX root = ../main.tex
+
+\chapter{State-Space Representation}
+
+One of the main interests of the current work is to find a compact
+representation of a robot's dynamics that correctly reflects the kinodynamics
+constraints in its actuators:
+
+\begin{align}
+  \module{\q} & \leq \qub \\
+  \module{\qdot} & \leq \qdotub \\
+  \module{\tautorque} & \leq \tauub \\
+  \module{\tautorquedot} & \leq \taudotub
+                           \shortintertext{where} & \nonumber \\
+  \tautorque,\tautorquedot &: \text{represent the joint torque and its derivative} \nonumber
+\end{align}
+
+Given ${\poselog=[\pos\ \rotlog]^T \in \sethree}$, where ${\pos
+  \incoordspace{R}{3}, \rotlog \in\sothree}$, and joint configuration,
+velocity and torques: ${\q,\qdot,\tautorque \incoordspace{R}{n}}$ in a n-dof
+serial robot, we can use a system state ${\x=[\poselog\ \q\ \qdot\
+  \tautorque]^T}$, along with the
+joint torque rate as input ${\uinput=\tautorquedot \incoordspace{R}{n}}$, to arrive at a compact
+representation of the system:
+
+\begin{gather}
+  \xdot = \A \x + \B \uinput + \V \label{eqn:ss_generic} \\
+  \label{eqn:ss_continuous}
+  \underbrace{\left[
+      \begin{array}{c}
+        \twist \\
+        \qdot \\
+        \qddot \\
+        \tautorquedot
+      \end{array}\right]}_{\xdot}=
+  \underbrace{\left[
+      \begin{array}{ccccc}
+          & 0 & 0 & \jac & 0 \\
+         &&& \eye{n} & 0 \\
+          &&&& \imat^{-1} \\
+          &&&& 0
+      \end{array}\right]}_{\A}
+  \underbrace{\left[
+      \begin{array}{c}
+        \poselog \\
+        \q \\
+        \qdot \\
+        \tautorque
+      \end{array}\right]}_{\x}
+  + \underbrace{
+    \left[
+      \begin{array}{ccc}
+        0 \\
+        0 \\
+        0 \\
+        \eye[ n ]
+      \end{array}\right]}_{\B}
+  \underbrace{\tautorquedot_{k}}_{\uinput}
+  + \underbrace{
+    \left[
+      \begin{array}{ccc}
+        0 \\
+        0 \\
+        -\imat^{-1}\biasforces \\
+        0
+      \end{array}\right]}_{\V}
+\end{gather}
+
+\section{Acceleration Observers}
+
+\section{Joint Acceleration Observer}
+
+To measure the joint acceleration, we define a discrete state-space observer can
+be designed each time-step as:
+
+\begin{gather}
+  \y_k = \C_k\x_k + \D_k \uinput_k + \W_k \label{eqn:ss_discrete_observer}
+\end{gather}
+
+Using~\labelcref{eqn:dynmodel}, and treating the term $-\imat^{-1}\biasforces$
+as noise, we arrive at the observer expression in the form of~\labelcref{eqn:ss_discrete_observer}:
+
+\begin{gather}
+  \underbrace{\qddot_k}_{\y_k} = \underbrace{\left[ \begin{array}{cccc} 0&0&0&\imat^{-1}\end{array}\right]}_{\C_k}
+  \x_k +
+  \underbrace{\left[ \begin{array}{c} 0\end{array}\right]}_{\D_k}
+  \uinput_k +
+  \underbrace{-\imat^{-1}\biasforces}_{\W_k}
+ \label{eqn:ss_joint_acceleration_observer}
+\end{gather}
+
+
+
+\section{Operational-space Observer}
+In order to track the state of the end-effector, a discrete state-space observer
+can be designed with the same form as~\labelcref{eqn:ss_discrete_observer}, this time with $\y = [\pos\ \posdot\ \posddot]^T$ representing the end-effector position
+and its derivatives.
+
+Assuming the $\jacdot\qdot$ term in $\posddot=\jac \qddot + \jacdot \qdot$ can
+be treated as noise, and using~\labelcref{eqn:dynmodel}, we arrive at a matricial formulation:
+
+\begin{gather}
+  \label{eqn:ss_ee_observer}
+  \underbrace{\left[
+      \begin{array}{c}
+        \pos_k \\
+        \posdot_k \\
+        \posddot_k
+      \end{array}\right]}_{\y_k}=
+  \underbrace{\left[
+      \begin{array}{cccc}
+        \eye{d} & 0 & 0 & 0 \\
+                && \jac & 0  \\
+                &&& \jac \imat^{-1}
+      \end{array}\right]}_{\C_k}
+  \underbrace{\left[
+      \begin{array}{c}
+        \pos_k\\
+        \q_k\\
+        \qdot_k\\
+        \tautorque_k
+      \end{array}\right]}_{\x_k}
+  + \underbrace{\left[
+      \begin{array}{c}
+        0
+      \end{array}\right]}_{\D_k}
+  \underbrace{\tautorquedot_{k}}_{\uinput_k}
+  + \underbrace{\left[
+      \begin{array}{c}
+        0 \\
+        0 \\
+        -\jac\imat^{-1}\biasforces + \jacdot \qdot
+      \end{array}\right]}_{\W_k}
+\end{gather}
+
+\section{Discretizing the Current System}
+\label{sec:discretization_lti_current_system}
+
+Given $\A_c$ in~\labelcref{eqn:ss_continuous} is nillpotent from power 3, we can find
+exact expressions for $\A_d,\K, \B_d$ by using their taylor series:
+
+\begin{align}
+  \A_d &= \underbrace{\eye[ n ]}_{k=0} + \underbrace{\left[
+         \begin{array}{cccc}
+           0 & 0 & \jac T_s & 0 \\
+           0 & 0 & \eye[ n ] T_s & 0 \\
+             &&& \imat^{-1} T_s \\
+             &&& 0
+         \end{array}\right]}_{k=1} + \underbrace{\left[
+                 \begin{array}{cccc}
+                   0 & 0 & 0 & \jac \imat^{-1} \frac{T_s^2}{2}\\
+                   0 & & 0 & \imat^{-1} \frac{T_s^2}{2} \\
+                     &&& 0 \\
+                     &&& 0
+                 \end{array}\right]}_{k=2} \\
+  \Rightarrow \A_d &= \left[
+                     \begin{array}{cccc}
+                       \eye[ n ] & 0 & \jac T_s & \jac \imat^{-1} \frac{T_s^2}{2} \\
+                               & \eye[ n ] & \eye[ n ] T_s & \imat^{-1} \frac{T_s^2}{2} \\
+                               &&\eye[ n ]& \imat^{-1} T_s \\
+                               &&& \eye[ n ]
+                     \end{array}\right]
+\end{align}
+
+\begin{align}
+  \K &= \underbrace{\eye[ n ] T_s}_{k=1, \text{ }\frac{A_c^0 T_s^1}{1}} + \underbrace{\left[
+       \begin{array}{cccc}
+         0 & 0 & \jac \frac{T_s^2}{2} & 0 \\
+         0 & 0 & \eye[ n ] \frac{T_s^2}{2} & 0 \\
+           &&& \imat^{-1} \frac{T_s^2}{2} \\
+           &&& 0
+       \end{array}\right]}_{k=2, \text{ }\frac{A_c T_s^2}{2}} + \underbrace{\left[
+               \begin{array}{cccc}
+                 0 & 0 & 0 & \jac \imat^{-1} \frac{T_s^3}{6} \\
+                   & & 0 & \imat^{-1} \frac{T_s^3}{6} \\
+                   &&& 0 \\
+                   &&& 0
+               \end{array}\right]}_{k=2,\text{ }\frac{A_c^2 T_s^3}{6}} \\
+  \Rightarrow \K &= \left[
+                   \begin{array}{cccc}
+                     \eye[ n ]T_s & 0 & \jac \frac{T_s^2}{2} & \jac \imat^{-1} \frac{T_s^3}{6} \\
+                                & \eye[ n ]T_s & \eye[ n ] \frac{T_s^2}{2} & \imat^{-1} \frac{T_s^3}{6} \\
+                                &&\eye[ n ]T_s& \imat^{-1} \frac{T_s^2}{2} \\
+                                &&& \eye[ n ]T_s
+                   \end{array}\right]
+\end{align}
+
+With:
+\begin{align}
+  \Rightarrow \B_d&= \K \B_c \\
+                  &= \left[
+                    \begin{array}{c}
+                      \jac \imat^{-1} \frac{T_s^3}{6} \\
+                      \imat^{-1} \frac{T_s^3}{6} \\
+                      \imat^{-1} \frac{T_s^2}{2} \\
+                      \eye[ n ]T_s
+                    \end{array}\right] \\
+  \Rightarrow \V_d&= \K \V_c \\
+                  &= \left[
+                    \begin{array}{c}
+                      -\frac{T_s^2}{2} \jac \imat^{-1}\biasforces \\
+                      -\frac{T_s^2}{2} \imat^{-1}\biasforces \\
+                      -T_s \imat^{-1}\biasforces \\
+                      0
+                    \end{array}\right] \\
+\end{align}
+
+
+\section{Generalizing Cartesian-space Tracking with Observer in a receding horizon}
+
+Using the end-effector observer (~\labelcref{eqn:ss_ee_observer}) with an adequately
+designed weight matrix $\Q$, we
+can formulate the MPC tracking strategy as a quadratic problem of minimizing the
+squared distance between $\y$ and the references trajectory points $\y^*$ for
+the whole horizon (developped in~\Cref{sec:leastsquare_qp}):
+\begin{gather}
+  \underset{\z}{\text{min }J} = ||\yoover(\z) - \yoover^*||^2_{\Q} \label{eqn:mpc_cost}
+\end{gather}
+s.t.
+\begin{align}
+  \xover &= \Ahat \xhat + \Bhat \uinputhat + \Vhat \label{eqn:ss_z_equality} \\
+         &= \left[
+           \begin{array}{cc}
+             \Ahat & \Bhat
+           \end{array}\right]
+                     \left[\begin{array}{c}
+                             \F_{\xhat} \\
+                             \F_{\uinputhat}
+                           \end{array}\right] \z + \Vhat \\
+  \yoover(\z) &= \Coover \xoover + \Doover \uinputoover + \Woover \label{eqn:ss_z_observer} \\
+         &= \left[
+           \begin{array}{cc}
+             \Coover & \Doover
+           \end{array}\right]
+                     \left[\begin{array}{c}
+                             \F_{\xoover} \\
+                             \F_{\uinputoover}
+                           \end{array}\right] \z + \Woover \\
+  \shortintertext{where:}
+  \y_k &= [\pos_k,\posdot_k,\posddot_k]^T \\
+  \x_k &= [\pos_k,\qdot_k,\qddot_k,\tautorque_k]^T \\
+  \xhat &= \F_{\xhat} \z  = [\x_0, \x_1,...,\x_{H-1}]^T \\
+  \uinputhat &= \F_{\uinputhat} \z = [\uinput_0, \uinput_1,...,\uinput_{H-1}]^T \\
+  \yhat &= [\y_0, \y_1,...,\y_{H-1}]^T \\
+  \yhat^*&= [\y_0^*, \y_1^*,...,\y_{H-1}^*]^T \\
+  \xover &= \F_{\xover} \z = [\x_1, \x_2,...,\x_H]^T \\
+  \yover &= [\y_1, \y_2,...,\y_H]^T \\
+  \xoover &= \F_{\xoover} \z = [\x_1, \x_2,...,\x_{H-1}]^T \\
+  \uinputoover &= \F_{\uinputoover} \z = [\uinput_1, \uinput_2,...,\uinput_{H-1}]^T \\
+  \yoover &= [\y_1, \y_2,...,\y_{H-1}]^T \\
+  \Vhat &= [\underbrace{\V_0, \V_0,...,\V_0}_{H}]^T, \What = [\underbrace{\W_0, \W_0,...,\W_0}_{H}]^T
+\end{align}
+
+\textbf{About the Equality Constraint}
+
+To clarify~\labelcref{eqn:ss_z_equality}, it's developed below:
+
+\begin{gather}
+  \smaller
+  \xover = \Ahat \xhat + \Bhat \uinputhat + \Vhat \tag*{~\labelcref{eqn:ss_z_equality}  revisited} \\
+  -\Vhat = \Ahat \xhat + \Bhat \uinputhat -\xover \\
+  -\Vhat = \left[
+    \begin{array}{ccc}
+      \Ahat & \Bhat & -\eye[ n_{\xover} ]
+    \end{array}\right]
+  \left[\begin{array}{c}
+          \F_{\xhat} \\
+          \F_{\uinputhat} \\
+          \F_{\xover}
+        \end{array}\right] \z
+\end{gather}
+
+\begin{gather}
+        -\underbrace{\left[
+          \begin{array}{c}
+            \V \\
+            \V \\
+            \vdots \\
+            \V
+          \end{array}\right]}_{\Vhat} =
+      \underbrace{\left[
+          \begin{array}{c|c|c}
+            \begin{array}{ccccc}
+              \A\\
+              &\A\\
+              &&\ddots\\
+              &&&\A
+            \end{array}
+              & \begin{array}{ccccc}
+                  \B\\
+                  &\B\\
+                  &&\ddots\\
+                  &&&\B
+                \end{array}
+              & \begin{array}{c}
+                  -\eye[ n_{\xover} ]
+                \end{array}
+          \end{array}\right]}_{\left[ \begin{array}{c|c|c} \Ahat & \Bhat & -\eye[ n_{\xover} ] \end{array}\right]}
+      \underbrace{\left[
+          \begin{array}{ccc}
+            \eye[ n_{\xhat}\times n_{\xhat} ]
+            & \zeros[ n_{\xhat}\times n_x ]
+            & \zeros[ n_{\xhat}\times n_{\uinputhat} ] \\
+            \hline
+            \zeros[ n_{\uinputhat}\times n_{\xhat} ]
+            & \zeros[ n_{\uinputhat}\times n_x ]
+            & \eye[ n_{\uinputhat}\times n_{\uinputhat} ] \\
+            \hline
+            \zeros[ n_{\xover}\times n_x ]
+            & \eye[ n_{\xover}\times n_{\xover} ]
+            & \zeros[ n_{\xover}\times n_{\uinputhat} ]
+          \end{array}\right]}_{\left[\begin{array}{c}
+                                       \F_{\xhat} \\
+                                       \hline
+                                       \F_{\uinputhat}\\
+                                       \hline
+                                       \F_{\xover}
+                                     \end{array}\right]}
+      \underbrace{\left[
+          \begin{array}{c}
+            \x_0 \\
+            \x_1 \\
+            \x_2 \\
+            \vdots \\
+            \x_{H-1} \\
+            \x_H \\
+            \uinputhat
+          \end{array}\right]}_{\z} \\
+      \shortintertext{with:} \nonumber \\
+      n_z = n_x+n_{\xhat}+n_{\uinputhat} \\
+      n_{\xhat} = Hn_x \\
+      n_{\uinputhat} = Hn_{\uinput}
+\end{gather}
+
+\textbf{About the observer Cost Function}
+
+It's important to note in~\labelcref{eqn:ss_ee_observer}, $\D=0$ (and thus in $\Doover$ in~\labelcref{eqn:ss_z_observer}),  to make it more clear:
+
+\begin{gather}
+  \yoover(\z) = \Coover \xoover + \Doover \uinputoover + \Woover \tag*{~\labelcref{eqn:ss_z_observer}  revisited} \\
+  \yoover(\z) = \Coover \underbrace{\F_{\xoover} \z}_{\xoover} + \Woover \\
+  \smaller
+  \underbrace{\left[
+      \begin{array}{c}
+        \y_1 \\
+        \y_2 \\
+        \y_3 \\
+        \vdots \\
+        \x_{H-1}
+      \end{array}\right]}_{\yoover}=
+  \underbrace{\left[
+      \begin{array}{ccccc}
+        \C \\
+        & \C \\
+        & & \C \\
+        &&&\ddots \\
+        & & & & \C \\
+      \end{array}\right]}_{\Coover}
+  \underbrace{\left[
+      \begin{array}{ccccc}
+        \zeros[ n_{\xoover}\times n_x ]
+        & \eye[ n_{\xoover}\times n_{\xoover} ]
+        & \eye[ n_{\xoover}\times n_x ]
+        & \zeros[ n_{\xoover}\times n_{\uinput} ]
+        & \zeros[ n_{\xoover}\times n_{\uinputoover} ]
+      \end{array}\right]}_{\F_{\xoover}}
+  \underbrace{\left[
+      \begin{array}{c}
+        \x_0 \\
+        \xoover \\
+        \x_H \\
+        \uinput_0 \\
+        \uinputoover
+      \end{array}\right]}_{\z}
+  +
+  \underbrace{\left[
+      \begin{array}{c}
+        \W \\
+        \W \\
+        \vdots \\
+        \W
+      \end{array}\right]}_{\Woover} \\
+  \shortintertext{with:} \nonumber \\
+  n_z = n_x+n_{\xoover}+n_x+n_{\uinputhat} \\
+  n_{\uinputhat} = n_{\uinputoover} + n_{\uinput} \\
+  n_{\uinputoover} = (H-1)n_{\uinput} \\
+  n_{\xoover} = (H-1)n_x
+\end{gather}
+
+
+\section{Using the generalized observer for position tracking}
+For an adequately chosen $\Q$, we can extract the end-effector pose and
+define que the cost function~\labelcref{eqn:mpc_cost} in such a way that:
+
+\begin{gather}
+  \underset{\z}{\text{min }J} = ||\posoover(\z) - \posoover^*||^2_{\Q} \label{eqn:mpc_pos_cost}
+\end{gather}
+
+where $\posoover = [\pos_1,\pos_2, ..., \pos_{H-1}]^T$, and likewise for the
+reference trajectory in the horizon~$\posoover^*$.
+
+As for $\Q$, it's defined in such a way that:
+\begin{gather}
+  (\yoover - \yoover^*)^T\Q(\yoover - \yoover^*) =
+  (\posoover - \posoover^*)^T\Q(\posoover - \posoover^*) \\
+  \Q = \left[
+    \begin{array}{ccccc}
+      \F_{\pos} \\
+      & \F_{\pos} \\
+      & & \F_{\pos} \\
+      &&&\ddots \\
+      & & & & \F_{\pos} \\
+    \end{array}\right] \\
+\shortintertext{with:} \nonumber\\
+\pos_k = \F_{\pos} \y_k \\
+\F_{\pos}=
+\left[
+  \begin{array}{ccc}
+    \eye[ n_d\times n_d ] \\
+    & \zeros[ n_d\times n_d ] \\
+    & & \zeros[ n_d\times n_d ]
+  \end{array}\right]
+\end{gather}
+
+Where $n_d$ is the dimension of the workspace.
